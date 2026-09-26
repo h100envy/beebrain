@@ -1,0 +1,54 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "beebrain"
+dynamic = ["version"]
+description = "a honeybee brain, simulated, scoring memecoin pools inside nerve"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.9"
+authors = [{name = "h100envy"}]
+keywords = ["honeybee", "mushroom-body", "sparse-coding", "simulation", "terminal", "memecoin"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Environment :: Console",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = []
+
+[project.optional-dependencies]
+render = ["numpy", "scipy", "pillow"]
+figures = ["playwright"]
+dev = ["pytest", "ruff"]
+
+[project.scripts]
+beebrain = "beebrain.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/h100envy/beebrain"
+Nerve = "https://github.com/h100envy/nerve"
+
+[tool.setuptools]
+packages = ["beebrain", "beebrain.terminal"]
+
+[tool.setuptools.dynamic]
+version = {attr = "beebrain.__version__"}
+
+[tool.ruff]
+line-length = 160
+target-version = "py39"
+extend-exclude = ["_incoming", "build", ".venv"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W"]
+ignore = ["E701", "E702", "E731", "E741"]
+
+[tool.ruff.lint.per-file-ignores]
+"render/*" = ["E501", "E401", "E402"]
+"brand/*" = ["E501", "E402"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
