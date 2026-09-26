@@ -2,7 +2,7 @@
 
 static site. no build server, no framework. every page works from disk.
 
-set the domain once: `python web/build.py --domain your.domain` (replaces BEEBRAIN_DOMAIN in meta tags, robots.txt and sitemap.xml).
+live at https://beebrain.pro. the domain is already set in meta tags, robots.txt and sitemap.xml (`python web/build.py --domain` changes it). vercel reads `vercel.json` here: root directory `web`, no build step.
 rebuild the article and the computed blocks: `python web/build.py`.
 
 - vercel: `npx vercel deploy web --prod`

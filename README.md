@@ -9,10 +9,11 @@
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-ffafd7?style=flat-square&labelColor=000000" alt="mit license"></a>
   <a href="https://github.com/h100envy/beebrain/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/h100envy/beebrain/ci.yml?branch=main&style=flat-square&labelColor=000000&color=ffb04a&label=ci" alt="ci status"></a>
   <a href="https://x.com/beebrainnerve"><img src="https://img.shields.io/badge/follow-%40beebrainnerve-f3efe6?style=flat-square&logo=x&logoColor=f3efe6&labelColor=000000" alt="follow @beebrainnerve on x"></a>
+  <a href="https://beebrain.pro/trade/"><img src="https://img.shields.io/badge/live-beebrain.pro-ff4fa3?style=flat-square&labelColor=000000" alt="live at beebrain.pro"></a>
 </p>
 
 <p align="center">
-  <a href="#race-the-bee-on-real-pools"><b>race the bee</b></a> ·
+  <a href="https://beebrain.pro/trade/"><b>race the bee live</b></a> ·
   <a href="#how-it-works"><b>how it works</b></a> ·
   <a href="#results-so-far"><b>results</b></a> ·
   <a href="docs/article.md"><b>the article</b></a> ·
@@ -46,7 +47,7 @@ beebrain scan --chain base --json  # one pass over the live field, for your own 
 beebrain forage --chain solana --minutes 60 --out solana.json && beebrain report solana.json
 ```
 
-or open `/trade` on the site: nothing to install, the bee keeps learning in your browser. data is read only, from the public dexscreener and geckoterminal apis. how it works: [docs/field.md](docs/field.md).
+or open [beebrain.pro/trade](https://beebrain.pro/trade/): nothing to install, the bee keeps learning in your browser. data is read only, from the public dexscreener and geckoterminal apis. how it works: [docs/field.md](docs/field.md).
 
 ## quick start
 
