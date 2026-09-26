@@ -250,6 +250,8 @@ def check(files):
             if r.startswith("/"):
                 target = os.path.join(WEB, r.lstrip("/"))
             if os.path.isdir(target):
+                if path.endswith(".md"):
+                    continue            # github renders a folder link as a listing
                 target = os.path.join(target, "index.html")
             if not os.path.exists(target):
                 bad.append("%s: broken link %s" % (os.path.relpath(path, ROOT), r))
