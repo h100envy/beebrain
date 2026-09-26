@@ -26,7 +26,7 @@
     FEE_SIDE: 0.01, IMPACT_MAX: 0.5, TAKE_PROFIT: 1.0, STOP_LOSS: -0.35, MAX_HOLD_MIN: 30,
     RUG_LIQ_DROP: 0.3, RUG_PRICE: -0.9, START: 500,
     HORIZON_MIN: 15, FWD_FEE: 0.02, DROP_AFTER_MIN: 20, MAX_AGE_DAYS: 30, MAX_FDV: 200e6, FIELD_TTL_MIN: 90,
-    RANDOM_MIN_RATE: 0.08, GRADUATE_POOLS: 300, GRADUATE_EDGE: 0.05, SEED: 5,
+    RANDOM_MIN_RATE: 0.08, GRADUATE_POOLS: 300, GRADUATE_EDGE: 0.05, FWD_CAP: 5, SEED: 5,
   };
   C.N_INPUTS = C.FEATS.length * C.N_BINS;
 
@@ -296,7 +296,7 @@
       this.rrand = new FieldRng(seed * 7 + 99);
       this.accounts = { you: new Account("you"), bee: new Account("bee"), random: new Account("random") };
       this.field = new Map(); this.seen = new Set(); this.queue = []; this.recent = []; this.shadows = [];
-      this.fwd = { PASS: { n: 0, wins: 0, net: 0 }, WATCH: { n: 0, wins: 0, net: 0 }, SKIP: { n: 0, wins: 0, net: 0 } };
+      this.fwd = { PASS: { n: 0, wins: 0, net: 0 }, WATCH: { n: 0, wins: 0, net: 0 }, SKIP: { n: 0, wins: 0, net: 0 }, BRAIN_SKIP: { n: 0, wins: 0, net: 0 } };
       this.fwdRecent = []; this.fwdDropped = 0;
       this.counts = { PASS: 0, WATCH: 0, SKIP: 0 };
       this.scored = 0; this.beeTakes = 0; this.reflexed = 0;
@@ -352,7 +352,7 @@
       const rand = this.accounts.random, rate = Math.max(C.RANDOM_MIN_RATE, this.beeTakes / this.scored);
       if (!reasons.length && this.rrand.random() < rate && rand.open.length < C.MAX_OPEN) rand.buy(s, rand.equity * C.SIZE_PASS, now, null, "random");
       if (reasons.length && this.rrand.random() < 0.3) this.say(now, pool.name + " reflex: " + reasons[0], "dim");
-      this.shadows.push({ pair: s.pair, symbol: s.symbol, t0: now, p0: s.price, due: now + this.horizonMin * 60000, verdict: v, act: t.act, took: rec.took });
+      this.shadows.push({ pair: s.pair, symbol: s.symbol, t0: now, p0: s.price, due: now + this.horizonMin * 60000, verdict: v, act: t.act, took: rec.took, reasons });
       this.recent.push(rec); if (this.recent.length > 60) this.recent.shift();
       this.last = rec;
       return rec;
@@ -383,8 +383,12 @@
       return closed;
     }
     resolve(sh, price) {
-      const net = (1 + (price / sh.p0 - 1)) * (1 - C.FWD_FEE) - 1, won = net > 0, f = this.fwd[sh.verdict];
-      f.n++; f.wins += won ? 1 : 0; f.net += net;
+      const net = (1 + (price / sh.p0 - 1)) * (1 - C.FWD_FEE) - 1, won = net > 0;
+      const keys = [sh.verdict].concat(sh.verdict === "SKIP" && !(sh.reasons && sh.reasons.length) ? ["BRAIN_SKIP"] : []);
+      for (const key of keys) {
+        const f = this.fwd[key] || (this.fwd[key] = { n: 0, wins: 0, net: 0 });
+        f.n++; f.wins += won ? 1 : 0; f.net += Math.min(net, C.FWD_CAP);
+      }
       this.fwdRecent.push([sh.symbol, sh.verdict, net]); if (this.fwdRecent.length > 200) this.fwdRecent.shift();
       if (!sh.took) { this.brain.learn(sh.act, won, C.GHOST_LR); this.brain.remember(sh.act, won); }
     }
@@ -407,11 +411,11 @@
     }
     gate() {
       const fw = this.forward(), n = fw.PASS.n + fw.WATCH.n + fw.SKIP.n;
-      const edge = fw.PASS.n && fw.SKIP.n ? fw.PASS.avg_net - fw.SKIP.avg_net : 0;
+      const edge = fw.PASS.n && fw.BRAIN_SKIP.n ? fw.PASS.avg_net - fw.BRAIN_SKIP.avg_net : 0;
       const bee = this.accounts.bee.equity, rnd = this.accounts.random.equity;
       const checks = [
         ["forward tested pools", n >= C.GRADUATE_POOLS, n + " of " + C.GRADUATE_POOLS],
-        ["PASS beats SKIP", edge >= C.GRADUATE_EDGE, pct(edge, 1) + " of +" + (C.GRADUATE_EDGE * 100).toFixed(0) + "%"],
+        ["PASS beats brain SKIP", edge >= C.GRADUATE_EDGE, pct(edge, 1) + " of +" + (C.GRADUATE_EDGE * 100).toFixed(0) + "%"],
         ["bee beats random", bee > rnd, "$" + bee.toFixed(0) + " vs $" + rnd.toFixed(0)],
       ];
       return { open: checks.every((c) => c[1]), checks };
@@ -429,6 +433,7 @@
       s.rng.a = d.rng >>> 0; s.rrand.a = d.rrand >>> 0;
       Object.assign(s.brain, { w: d.brain.w, eps: d.brain.eps, resolved: d.brain.resolved, sugar: d.brain.sugar, pain: d.brain.pain, memory: d.brain.memory });
       s.accounts = { you: Account.from(d.accounts.you), bee: Account.from(d.accounts.bee), random: Account.from(d.accounts.random) };
+      d.fwd.BRAIN_SKIP = d.fwd.BRAIN_SKIP || { n: 0, wins: 0, net: 0 };
       Object.assign(s, { shadows: d.shadows, fwd: d.fwd, fwdDropped: d.fwdDropped, fwdRecent: d.fwdRecent || [], counts: d.counts,
         scored: d.scored, beeTakes: d.beeTakes, reflexed: d.reflexed, seen: new Set(d.seen), log: d.log || [], started: d.started || Date.now() });
       return s;

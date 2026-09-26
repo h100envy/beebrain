@@ -29,7 +29,8 @@ MAX_FDV = 200e6
 FIELD_TTL_MIN = 90.0
 RANDOM_MIN_RATE = 0.08
 GRADUATE_POOLS = 300            # forward tested pools before the gate can open
-GRADUATE_EDGE = 0.05            # PASS must beat SKIP by this much average net return
+GRADUATE_EDGE = 0.05            # PASS must beat the brain's own SKIPs by this much average net return
+FWD_CAP = 5.0                   # +500%. one dead pool that "revives" 1000x would own every average otherwise
 SEED = 5
 
 
@@ -47,7 +48,8 @@ class FieldSession:
         self.queue = deque()
         self.recent = deque(maxlen=60)   # scored pools, newest last
         self.shadows = []                # pending forward tests
-        self.fwd = {v: {"n": 0, "wins": 0, "net": 0.0} for v in ("PASS", "WATCH", "SKIP")}
+        # SKIP counts every skip. BRAIN_SKIP only the skips the lobes made, reflex kills left out
+        self.fwd = {v: {"n": 0, "wins": 0, "net": 0.0} for v in ("PASS", "WATCH", "SKIP", "BRAIN_SKIP")}
         self.fwd_recent = deque(maxlen=200)
         self.fwd_dropped = 0
         self.fwd_log = []                # every resolved forward test, for reports
@@ -176,10 +178,12 @@ class FieldSession:
         ret = price / sh["p0"] - 1
         net = (1 + ret) * (1 - FWD_FEE) - 1
         won = net > 0
-        f = self.fwd[sh["verdict"]]
-        f["n"] += 1
-        f["wins"] += 1 if won else 0
-        f["net"] += net
+        keys = [sh["verdict"]] + (["BRAIN_SKIP"] if sh["verdict"] == "SKIP" and not sh.get("reasons") else [])
+        for key in keys:
+            f = self.fwd.setdefault(key, {"n": 0, "wins": 0, "net": 0.0})
+            f["n"] += 1
+            f["wins"] += 1 if won else 0
+            f["net"] += min(net, FWD_CAP)
         self.fwd_recent.append((sh["symbol"], sh["verdict"], net))
         if len(self.fwd_log) < 20000:
             self.fwd_log.append({k: sh.get(k) for k in ("symbol", "pair", "verdict", "comb", "obs", "noise", "reasons", "liq", "took", "t0")}
@@ -218,11 +222,11 @@ class FieldSession:
     def gate(self):
         """when the bee has earned a look at real money: enough pools, PASS beats SKIP, bee beats random"""
         fw = self.forward()
-        n = sum(f["n"] for f in fw.values())
-        edge = fw["PASS"]["avg_net"] - fw["SKIP"]["avg_net"] if fw["PASS"]["n"] and fw["SKIP"]["n"] else 0.0
+        n = fw["PASS"]["n"] + fw["WATCH"]["n"] + fw["SKIP"]["n"]
+        edge = fw["PASS"]["avg_net"] - fw["BRAIN_SKIP"]["avg_net"] if fw["PASS"]["n"] and fw["BRAIN_SKIP"]["n"] else 0.0
         bee, rnd = self.accounts["bee"].equity, self.accounts["random"].equity
         checks = [("forward tested pools", n >= GRADUATE_POOLS, "%d of %d" % (n, GRADUATE_POOLS)),
-                  ("PASS beats SKIP", edge >= GRADUATE_EDGE, "%+.1f%% of %+.0f%%" % (edge * 100, GRADUATE_EDGE * 100)),
+                  ("PASS beats brain SKIP", edge >= GRADUATE_EDGE, "%+.1f%% of %+.0f%%" % (edge * 100, GRADUATE_EDGE * 100)),
                   ("bee beats random", bee > rnd, "$%.0f vs $%.0f" % (bee, rnd))]
         return {"open": all(c[1] for c in checks), "checks": checks}
 
@@ -253,6 +257,7 @@ class FieldSession:
             s.brain.memory.append((frozenset(a), w))
         s.accounts = {k: Account.from_json(v) for k, v in d["accounts"].items()}
         s.shadows, s.fwd, s.fwd_dropped = d["shadows"], d["fwd"], d["fwd_dropped"]
+        s.fwd.setdefault("BRAIN_SKIP", {"n": 0, "wins": 0, "net": 0.0})
         s.counts, s.scored, s.bee_takes, s.reflexed = d["counts"], d["scored"], d["bee_takes"], d["reflexed"]
         s.seen = set(d["seen"])
         return s

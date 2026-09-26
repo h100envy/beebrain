@@ -157,6 +157,21 @@ in the terminal the length of the straight run is the score and the width of the
 
 paper account from $500, nine days of 40 pools, fees in. `beebrain sim --seeds 0-9` prints this table. the tests pin it.
 
+### first contact with the real market
+
+the first headless field runs, 26 september 2026, a fresh bee on each chain, 15 minute forward test, fees in:
+
+| | solana, 74 min | base, 80 min |
+| --- | --- | --- |
+| pools scored | 522 | 137 |
+| forward tested | 516 | 123 |
+| PASS hit rate | 31% (36 pools) | 17% (6 pools) |
+| SKIP by the brain, hit rate | 13% (238 pools) | 33% (21 pools) |
+| the bee | -30.3% | +1.0% |
+| random baseline | -69.8% | -16.7% |
+
+**on solana the bee's passes went up three times as often as its skips, and it lost less than half what random lost. it still lost. the gate stays closed.** full reports and raw data: [docs/field-reports](docs/field-reports/).
+
 ## what it does not do
 
 - **it is scaled down.** a real bee has about 960,000 neurons. the model runs 2,000 kenyon cells and a few hundred drawn cells for display.

@@ -98,7 +98,9 @@ def _forage(a):
 
 def _report(a):
     from .field.report import report
-    with open(a.path) as fh:
+    import gzip
+    opener = gzip.open if a.path.endswith(".gz") else open
+    with opener(a.path, "rt") as fh:
         print(report(json.load(fh)), end="")
     return 0
 

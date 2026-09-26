@@ -16,7 +16,7 @@ import time
 from ..brain import FEATS
 from .feed import Feed, now_ms
 from .features import LIVE_LABELS
-from .session import FieldSession
+from .session import FWD_CAP, FieldSession
 
 SCORE_FAST_S, SCORE_MID_S, SCORE_SLOW_S = 0.9, 1.6, 2.4
 MARK_S = 2.0
@@ -111,7 +111,13 @@ def spearman(a, b):
     return num / den if den else None
 
 
+def cap(xs):
+    return [min(x, FWD_CAP) for x in xs]
+
+
 def pct(x, d=1):
+    if x > FWD_CAP:
+        return ">+%.0f%%" % (FWD_CAP * 100)
     return ("%+." + str(d) + "f%%") % (x * 100)
 
 
@@ -124,14 +130,18 @@ def report(d):
     w("%.0f minutes on live pools. %d pools scored, %d forward tested at +%s min, fees in. paper money only." % (
         d["minutes"], d["scored"], len(log), "15"))
     w("")
+    w("averages cap each 15 minute return at +%.0f%%, so one dead pool that reprices a thousandfold cannot own a column. %d pools hit the cap." % (
+        FWD_CAP * 100, sum(1 for r in log if r["net"] > FWD_CAP)))
+    w("")
     w("## forward test")
     w("")
     w("| verdict | pools | hit rate | avg net | median net |")
     w("| --- | --- | --- | --- | --- |")
-    for v in ("PASS", "WATCH", "SKIP"):
-        xs = [r["net"] for r in log if r["verdict"] == v]
+    groups = [(v, [r["net"] for r in log if r["verdict"] == v]) for v in ("PASS", "WATCH", "SKIP")]
+    groups.append(("SKIP by the brain", [r["net"] for r in log if r["verdict"] == "SKIP" and not r["reasons"]]))
+    for v, xs in groups:
         if xs:
-            w("| %s | %d | %.0f%% | %s | %s |" % (v, len(xs), 100 * mean([x > 0 for x in xs]), pct(mean(xs)), pct(median(xs))))
+            w("| %s | %d | %.0f%% | %s | %s |" % (v, len(xs), 100 * mean([x > 0 for x in xs]), pct(mean(cap(xs))), pct(median(xs))))
         else:
             w("| %s | 0 | - | - | - |" % v)
     brain_skip = [r["net"] for r in log if r["verdict"] == "SKIP" and not r["reasons"]]
@@ -144,7 +154,7 @@ def report(d):
     w("| --- | --- | --- | --- | --- |")
     for name, xs in (("killed by a reflex", reflex), ("reached the lobes", reached), ("brain said SKIP", brain_skip)):
         if xs:
-            w("| %s | %d | %.0f%% | %s | %s |" % (name, len(xs), 100 * mean([x > 0 for x in xs]), pct(mean(xs)), pct(median(xs))))
+            w("| %s | %d | %.0f%% | %s | %s |" % (name, len(xs), 100 * mean([x > 0 for x in xs]), pct(mean(cap(xs))), pct(median(xs))))
     by = {}
     for r in log:
         for reason in r["reasons"] or []:
@@ -152,7 +162,7 @@ def report(d):
     if by:
         w("")
         for reason, xs in sorted(by.items(), key=lambda kv: -len(kv[1])):
-            w("- %s: %d pools, avg %s, median %s" % (reason, len(xs), pct(mean(xs)), pct(median(xs))))
+            w("- %s: %d pools, hit %.0f%%, median %s" % (reason, len(xs), 100 * mean([x > 0 for x in xs]), pct(median(xs))))
     w("")
     w("## the race")
     w("")
@@ -179,15 +189,20 @@ def report(d):
     w("")
     w("## gate")
     w("")
-    for name, ok, val in d["gate"]["checks"]:
-        w("- %s %s: %s" % ("[x]" if ok else "[ ]", name, val))
+    p_ = [r["net"] for r in log if r["verdict"] == "PASS"]
+    s_ = [r["net"] for r in log if r["verdict"] == "SKIP" and not r["reasons"]]
+    edge = mean(cap(p_)) - mean(cap(s_)) if p_ and s_ else 0.0
+    bee, rnd = d["accounts"]["bee"]["equity"], d["accounts"]["random"]["equity"]
+    w("- %s forward tested pools: %d of 300" % ("[x]" if len(log) >= 300 else "[ ]", len(log)))
+    w("- %s PASS beats the brain's SKIP by 5 points: %s" % ("[x]" if edge >= 0.05 else "[ ]", pct(edge)))
+    w("- %s bee beats random: $%.0f vs $%.0f" % ("[x]" if bee > rnd else "[ ]", bee, rnd))
     w("")
     w("brain: %d sugar, %d punishment, explore %.0f%%. feed: %d calls, %d errors." % (
         d["brain"]["sugar"], d["brain"]["pain"], d["brain"]["eps"] * 100, d["feed"]["calls"], d["feed"]["errors"]))
-    top = sorted(log, key=lambda r: -r["net"])[:5]
+    top = sorted([r for r in log if r["net"] <= FWD_CAP], key=lambda r: -r["net"])[:5]
     low = sorted(log, key=lambda r: r["net"])[:5]
     if top:
         w("")
-        w("best 15 minutes: " + ", ".join("$%s %s (%s)" % (r["symbol"], pct(r["net"], 0), r["verdict"].lower()) for r in top))
+        w("best 15 minutes, under the cap: " + ", ".join("$%s %s (%s)" % (r["symbol"], pct(r["net"], 0), r["verdict"].lower()) for r in top))
         w("worst 15 minutes: " + ", ".join("$%s %s (%s)" % (r["symbol"], pct(r["net"], 0), r["verdict"].lower()) for r in low))
     return "\n".join(lines) + "\n"
