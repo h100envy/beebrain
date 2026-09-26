@@ -8,6 +8,15 @@
   <img src="https://img.shields.io/badge/python-3.9%2B-ff4fa3?style=flat-square&labelColor=000000" alt="python 3.9 and newer">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-ffafd7?style=flat-square&labelColor=000000" alt="mit license"></a>
   <a href="https://github.com/h100envy/beebrain/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/h100envy/beebrain/ci.yml?branch=main&style=flat-square&labelColor=000000&color=ffb04a&label=ci" alt="ci status"></a>
+  <a href="https://x.com/beebrainnerve"><img src="https://img.shields.io/badge/follow-%40beebrainnerve-f3efe6?style=flat-square&logo=x&logoColor=f3efe6&labelColor=000000" alt="follow @beebrainnerve on x"></a>
+</p>
+
+<p align="center">
+  <a href="#race-the-bee-on-real-pools"><b>race the bee</b></a> ·
+  <a href="#how-it-works"><b>how it works</b></a> ·
+  <a href="#results-so-far"><b>results</b></a> ·
+  <a href="docs/article.md"><b>the article</b></a> ·
+  <a href="https://x.com/beebrainnerve"><b>x.com/beebrainnerve</b></a>
 </p>
 
 <p align="center">
@@ -62,6 +71,14 @@ beebrain sim --seeds 0-9
 the package and the terminal are stdlib only, python 3.9 and newer.
 
 ## how it works
+
+<p align="center">
+  <img src="docs/media/lobes.svg" width="100%" alt="five lobes in a row: antennal smells the pool, optic sees the shape, mushroom remembers with 2,000 kenyon cells, central chooses explore or exploit, motor says pass watch or skip and sends sugar or punishment back">
+</p>
+
+<p align="center">
+  <img src="docs/media/brain3d.gif" width="100%" alt="a point cloud honeybee brain. a real pool from an engine run travels through the lobes and the motor lights up with the verdict">
+</p>
 
 | lobe | in a real bee | in beebrain |
 | --- | --- | --- |
@@ -176,6 +193,10 @@ the full write up is in [docs/article.md](docs/article.md). the static site in [
 ## built on nerve
 
 beebrain is a node for [nerve](https://github.com/h100envy/nerve), a nervous system for trading agents. the idea comes from the nerve protocol.
+
+## follow the bee
+
+new builds, field reports and the bee's forward test land first on x: [@beebrainnerve](https://x.com/beebrainnerve).
 
 ## license
 

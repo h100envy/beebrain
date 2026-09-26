@@ -170,6 +170,7 @@ ARTICLE_HEAD = """<!doctype html>
 <meta property="og:image:height" content="600">
 <meta property="og:image:alt" content="a honeycomb brain with the BeeBrain wordmark">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@beebrainnerve">
 <meta name="twitter:title" content="BeeBrain · NERVE">
 <meta name="twitter:description" content="a honeybee brain, simulated, scoring memecoin pools inside nerve">
 <meta name="twitter:image" content="https://BEEBRAIN_DOMAIN/assets/brand/cover.png">
@@ -201,7 +202,8 @@ ARTICLE_FOOT = """
 <footer class="foot">
   <p>beebrain is research and visualisation. synthetic pools, paper account. no keys, no signatures, no orders.</p>
   <p><a href="https://github.com/h100envy/beebrain">github.com/h100envy/beebrain</a>
-     · built on <a href="https://github.com/h100envy/nerve">nerve</a> · mit license</p>
+     · built on <a href="https://github.com/h100envy/nerve">nerve</a> · mit license
+     · <a href="https://x.com/beebrainnerve">@beebrainnerve on x</a></p>
 </footer>
 </body>
 </html>
