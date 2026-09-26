@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>the article · BeeBrain · NERVE</title>
+<meta name="description" content="a honeybee brain, simulated, scoring memecoin pools inside nerve">
+<meta name="theme-color" content="#000000">
+<link rel="canonical" href="https://BEEBRAIN_DOMAIN/article/">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="BeeBrain">
+<meta property="og:title" content="BeeBrain · NERVE">
+<meta property="og:description" content="a honeybee brain, simulated, scoring memecoin pools inside nerve">
+<meta property="og:url" content="https://BEEBRAIN_DOMAIN/article/">
+<meta property="og:image" content="https://BEEBRAIN_DOMAIN/assets/brand/cover.png">
+<meta property="og:image:width" content="1500">
+<meta property="og:image:height" content="600">
+<meta property="og:image:alt" content="a honeycomb brain with the BeeBrain wordmark">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="BeeBrain · NERVE">
+<meta name="twitter:description" content="a honeybee brain, simulated, scoring memecoin pools inside nerve">
+<meta name="twitter:image" content="https://BEEBRAIN_DOMAIN/assets/brand/cover.png">
+<link rel="icon" href="../assets/brand/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="../assets/brand/favicon-32.png">
+<link rel="apple-touch-icon" href="../assets/brand/apple-touch-icon.png">
+<link rel="preload" href="../assets/fonts/jetbrainsmono-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../assets/fonts/fonts.css">
+<link rel="stylesheet" href="../assets/site.css">
+</head>
+<body class="article">
+<a class="skip" href="#main">skip to the article</a>
+<header class="bar">
+  <a class="mark" href="../">BeeBrain</a>
+  <nav aria-label="site">
+    <a href="../#how">how it works</a>
+    <a href="../robinhood/">robinhood chain</a>
+    <a href="https://github.com/h100envy/beebrain">github</a>
+  </nav>
+</header>
+<main id="main">
+<p class="sim-tag">sim · synthetic pools · paper account</p>
+<article class="prose">
+<h1 id="beebrain-nerve">BEEBRAIN · NERVE</h1>
+<figure><img src="../assets/brand/cover.png" alt="BeeBrain cover: a honeycomb brain with the BeeBrain wordmark" loading="lazy"><figcaption>BeeBrain cover: a honeycomb brain with the BeeBrain wordmark</figcaption></figure>
+<p><strong>a bee brain inside a memecoin desk.</strong></p>
+<p>nerve already had reflexes, a spine and a row of model nodes. it did not have a brain that learns from its own trades.</p>
+<p>beebrain is that brain. a simulated honeybee mind that sits inside the nerve pipeline, scores every new pool through five lobes, and shows you which part of itself agrees and which part does not.</p>
+<p>this is how it got there, what it is built from, and what it still cannot do.</p>
+<h2 id="1-after-the-fly-i-looked-at-the-bee">1. after the fly, i looked at the bee</h2>
+<p>the first brain in nerve was a fruit fly. henry-01 ran 761 simulated neurons and 2,564 synapses across three regions: two optic lobes, a central brain and a nerve cord.</p>
+<p>it learned which trading signal to trust by trial and error. exploration started at 60% and decayed to 6%. on its own it found that creator wallet age was the signal worth listening to.</p>
+<p>the idea came from flywire. in 2024 that project published the full wiring of an adult fruit fly brain: 139,255 neurons and about 54.5 million synapses. for the first time a whole brain could be explored like a map.</p>
+<p>but a fly has a small learning center. it has about 2,500 kenyon cells per mushroom body, the part of the insect brain that learns associations. a honeybee has roughly 175,000 per mushroom body.</p>
+<p>that gap is the whole reason for this article. if the fly could find one signal, what would a brain built for learning find in a memecoin feed?</p>
+<h2 id="2-a-million-neurons-in-one-cubic-millimetre">2. a million neurons in one cubic millimetre</h2>
+<p>the honeybee brain has a volume of about 1 mm³ and holds around 960,000 neurons (<a href="https://bionumbers.hms.harvard.edu/bionumber.aspx?id=109328">bionumbers, after menzel and giurfa 2001</a>). that is roughly seven times the fly.</p>
+<p>the number that matters for trading is not the total. it is where the neurons sit. kenyon cells make up about 20% of all neurons in a bee brain and about 2% in a fly (<a href="https://repository.cshl.edu/id/eprint/15381/">campbell and turner 2010</a>).</p>
+<p>so a bee spends a fifth of its brain on one job: linking what it senses to what happened next. that is the exact job of a memecoin scorer.</p>
+<figure><img src="../assets/article/01-fly-vs-bee.png" alt="fruit fly vs honeybee: share of the brain spent on kenyon cells" loading="lazy"><figcaption>fruit fly vs honeybee: share of the brain spent on kenyon cells</figcaption></figure>
+<p>there is one more detail i keep coming back to. forager bees with more flying experience grow more branched dendrites in their mushroom bodies than bees of the same age that flew less (<a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC6763189">farris et al. 2001</a>). experience literally rewires the learning center.</p>
+<p>a caveat worth stating early. i did not find a public whole-brain honeybee connectome like flywire. there are anatomical atlases and decades of physiology, but no complete synapse map. beebrain borrows the architecture, not a wiring file.</p>
+<h2 id="3-one-neuron-carries-the-sugar">3. one neuron carries the sugar</h2>
+<p>in 1993 martin hammer found a single identified neuron in the bee brain that stands in for reward. it is called vummx1. when he paired an odor with electrical stimulation of that one cell, the bee learned the odor as if it had been fed sugar (<a href="https://www.frontiersin.org/journals/behavioral-neuroscience/articles/10.3389/fnbeh.2010.00172/pdf">mizunami and matsumoto 2010, reviewing hammer 1993</a>).</p>
+<p>vummx1 is octopaminergic. in 1998 hammer and menzel injected octopamine straight into the antennal lobes and the mushroom body calyces, the places this neuron ends. the injection replaced the sugar. the bee still learned.</p>
+<p>the punishment channel runs on a different chemical. in insects dopamine carries the aversive signal, the opposite of the reward role it plays in mammals. the same review notes that punishment memories fade faster than reward memories in insects.</p>
+<p>this is the most useful thing i took from bee biology. a memecoin desk has the same two channels:</p>
+<ul><li>a closed trade in profit is sugar. it is broadcast to the antennal lobes and the mushroom bodies at once, like vummx1</li><li>a rug is punishment. it travels on a separate channel with its own weight</li><li>one design choice goes against the bee. in beebrain rug memory does not fade faster than print memory. a creator who rugged once is not forgiven because time passed</li></ul>
+<figure><img src="../assets/article/03-reward-channels.png" alt="vummx1 and the sugar and punishment channels" loading="lazy"><figcaption>vummx1 and the sugar and punishment channels</figcaption></figure>
+<p>in the first terminal build i labelled the reward signal dopamine. that is the mammal convention and it is wrong for a bee. the next build calls it what it is.</p>
+<h2 id="4-the-waggle-dance-is-an-output-format">4. the waggle dance is an output format</h2>
+<p>karl von frisch decoded it and shared the 1973 nobel prize for it. a forager returns to the hive and runs a figure eight on the comb. the straight waggling run carries the message (<a href="https://www.nature.com/articles/533032a">nature, review of von frisch's work</a>).</p>
+<ul><li>the angle of the run against vertical encodes direction relative to the sun</li><li>the duration of the run encodes distance. a 2.5 second run points to food roughly 2.6 km away (<a href="https://content.ces.ncsu.edu/honey-bee-dance-language">nc state extension</a>)</li><li>the vigour of the dance tracks how good the source is</li></ul>
+<p>the bee does not say food yes or food no. it sends a small structured vector that other bees can act on. during swarming, scout bees use the same dance to argue for different nest sites.</p>
+<p>that is exactly what was missing in nerve. every node used to return one number. a confidence of 0.73 hides everything: five lobes at 0.73 and three lobes at 0.95 with two at 0.40 are completely different situations.</p>
+<p>so beebrain answers with a waggle vector instead:</p>
+<div class="table"><table><thead><tr><th scope="col">field</th><th scope="col">what it carries</th></tr></thead><tbody><tr><td>mushroom</td><td>memory: how often this pool shape was seen and how often it printed</td></tr><tr><td>antennal</td><td>input quality: how noisy and self contradicting the pool data is</td></tr><tr><td>optic</td><td>market shape: narrative heat and acceleration</td></tr><tr><td>central</td><td>the decision state: score, explore or exploit</td></tr><tr><td>motor</td><td>the verdict: PASS, WATCH or SKIP, plus a flag when one lobe dissents</td></tr><tr><td>consensus</td><td>how much the lobes agree</td></tr></tbody></table></div>
+<p>in the terminal the dance is drawn literally. the length of the straight run is the score. the width of the wiggle is the dissent between lobes.</p>
+<figure><img src="../assets/article/04-waggle-vector.png" alt="the waggle vector" loading="lazy"><figcaption>the waggle vector</figcaption></figure>
+<h2 id="5-what-nerve-already-had">5. what nerve already had</h2>
+<p>nerve is a nervous system for trading agents. each agent is a specialised nerve, and reflexes fire before any model is called. beebrain plugs into it, so here is the body it lives in.</p>
+<p>five pieces hold the protocol together:</p>
+<div class="table"><table><thead><tr><th scope="col">piece</th><th scope="col">job</th></tr></thead><tbody><tr><td>impulse</td><td>the typed message every node sends and receives</td></tr><tr><td>nervenode</td><td>the agent contract, with a mandatory boundary on what each node may touch</td></tr><tr><td>reflex</td><td>deterministic checks that run before any model call</td></tr><tr><td>spine</td><td>the router that decides which node sees an impulse next</td></tr><tr><td>nervestore</td><td>the audit trail of every impulse and verdict</td></tr></tbody></table></div>
+<p>and these are the nodes a memecoin pool meets today:</p>
+<div class="table"><table><thead><tr><th scope="col">node</th><th scope="col">what it does on a new pool</th></tr></thead><tbody><tr><td>scanner</td><td>watches new dex pools on solana, robinhood chain and base</td></tr><tr><td>reflex layer</td><td>kills bundled launches, sniper heavy pools and bump ratio abuse without a model</td></tr><tr><td>sentinel</td><td>simulates a sell with eth_call to catch honeypots and hidden taxes</td></tr><tr><td>jev</td><td>answers four typed questions in about 190 ms: liquidity, team, narrative, timing</td></tr><tr><td>memecoin analyzer</td><td>checks who made the token: copied descriptions, twitter age, telegram ratio, whois age, creator wallet history</td></tr><tr><td>grok narrative brain</td><td>reads ct, telegram and reddit, builds a live narrative map with acceleration and freshness</td></tr><tr><td>opus 5.5 analyst</td><td>writes a thesis, attacks it, rewrites it. only the thesis that survives leaves the slot</td></tr><tr><td>risk and exit</td><td>sizing, stops and the exit manager</td></tr></tbody></table></div>
+<p>nerve never holds your keys. the pool scanner returns a scored feed and you decide. five presets sit on top of the same nodes: paranoid, sprinter, grinder, sniper and ghost, the paper only benchmark that buys nothing.</p>
+<p>what nerve lacked was memory that learns. every node judged each pool as if it were the first one it had ever seen.</p>
+<h2 id="6-where-the-bee-sits-in-nerve">6. where the bee sits in nerve</h2>
+<p>beebrain sits after the reflexes and before the models. the cheap deterministic checks still kill the obvious rugs first. the bee only sees pools that survived them.</p>
+<figure><img src="../assets/article/05-pipeline.png" alt="where the bee sits in nerve" loading="lazy"><figcaption>where the bee sits in nerve</figcaption></figure>
+<p>each lobe maps to a job the desk already needed:</p>
+<div class="table"><table><thead><tr><th scope="col">lobe</th><th scope="col">in a real bee</th><th scope="col">in beebrain</th></tr></thead><tbody><tr><td>antennal lobes</td><td>first relay for smell, organised in glomeruli</td><td>eight glomeruli, one per pool feature: liquidity, holders, snipers, bundle, creator age, heat, acceleration, volume. measures input noise</td></tr><tr><td>optic lobes</td><td>vision, motion, shape</td><td>reads 60 ticks of narrative heat from the grok map. sees the shape of the market, not single numbers</td></tr><tr><td>mushroom bodies</td><td>association and memory</td><td>2,000 simulated kenyon cells. each samples 6 of 32 binned inputs. only the top 5% fire for any pool</td></tr><tr><td>central complex</td><td>navigation and action selection</td><td>a ring attractor bump that settles on the score. decides explore or exploit</td></tr><tr><td>subesophageal ganglion</td><td>mouthparts and feeding, home of vummx1</td><td>the verdict and the reward broadcast back into memory</td></tr></tbody></table></div>
+<figure><img src="../assets/article/02-lobes.png" alt="five lobes, five jobs on the desk" loading="lazy"><figcaption>five lobes, five jobs on the desk</figcaption></figure>
+<p>one pool through the brain looks like this:</p>
+<ol><li>the pool arrives as an impulse. each glomerulus lights up with its feature value</li><li>the optic lobes compare the pool's narrative against the heat history</li><li>the mushroom bodies form a sparse code. roughly 100 of 2,000 cells fire. their learned weights give the memory score</li><li>the central complex weighs memory, input quality, narrative and sniper share. early on it explores half the time. that falls to 5% as memory fills</li><li>the motor output emits PASS, WATCH or SKIP with the full waggle vector</li><li>when the trade closes, the result travels back as sugar or punishment. only the kenyon cells that fired for that pool are updated</li></ol>
+<p>that last step is the whole point. the bee does not learn a rule like creator age above x. it learns which combinations of features, coded sparsely, tend to end in sugar.</p>
+<h2 id="7-first-run-on-solana-the-terminal">7. first run on solana: the terminal</h2>
+<p>the first beebrain build is a terminal. black background, pink hairlines, one screen:</p>
+<ul><li><strong>bee brain.</strong> about 800 drawn cells laid out as real lobes. four calyces on top, two big optic lobes, the central complex, antennal lobes and the motor node. white pulses run along the tracts as a pool moves through</li><li><strong>waggle dance.</strong> a live figure eight next to the per lobe vector</li><li><strong>live pool.</strong> the eight features the antennae smell, plus input noise</li><li><strong>mushroom memory.</strong> how many kenyon cells lean toward print or rug, and how fast exploration is falling</li><li><strong>account, open positions, hive log.</strong> every entry, every drawdown the bee held through, every close</li></ul>
+<figure><img src="../assets/article/07-terminal-solana.png" alt="the beebrain terminal on synthetic solana pools" loading="lazy"><figcaption>the beebrain terminal on synthetic solana pools</figcaption></figure>
+<p>the run used synthetic solana pools, a paper account starting at $500, fees included, and nine simulated days of 40 pools each. i ran ten seeds with the same settings.</p>
+<figure><img src="../assets/article/06-solana-seeds.png" alt="ten seeds, one brain, nine days" loading="lazy"><figcaption>ten seeds, one brain, nine days</figcaption></figure>
+<p>the spread is the honest part. on three seeds the bee grew cautious early, traded little and went nowhere. on two it compounded hard.</p>
+<p>and the important caveat. these pools are synthetic, and i planted the edge myself: creator age, sniper share and bundles decide the hidden odds. the run shows that the brain can find an edge that exists. it does not show that this edge exists on a real chain. that is what live data is for.</p>
+<h2 id="8-first-contact-with-robinhood-chain">8. first contact with robinhood chain</h2>
+<p>the real test of a brain is a place it has never seen. so the second build drops the solana trained bee onto robinhood chain, where memecoins dominate early volume and new pools arrive every couple of seconds.</p>
+<p>this one is a node graph page. source, spawn, antennal lobes, mushroom bodies, central complex, motor and you, left to right, with wires that light up as a pool travels. a terminal panel underneath draws the bee brain firing in sync.</p>
+<figure><img src="../assets/article/08-robinhood-first-contact.png" alt="first contact with robinhood chain" loading="lazy"><figcaption>first contact with robinhood chain</figcaption></figure>
+<p>what happens in the run:</p>
+<ul><li><strong>day 1, first contact.</strong> input noise starts at 0.71 against a solana baseline of 0.28. while noise stays above 0.52 the central complex holds an explore lock. it trusts nothing and skips about 98% of pools</li><li><strong>day 2, a shape appears.</strong> wallets keep arriving from the same deployer contracts. the bee starts clustering pools by deployer, not by wallet address. nothing in the solana memory taught it this</li><li><strong>day 3, pattern confirmed.</strong> a deployer cluster is confirmed after at least 6 observed outcomes with a hit rate of 60% or more. known deployers start carrying the score</li><li><strong>days 4 to 6.</strong> noise settles near the solana baseline, exploration fades, and the skip rate drops into the 80s</li></ul>
+<p>one recorded run on seed 11 ended with 26 trades, 18 of them wins, all on known deployers, and a paper account up from $300 to about $1,500. the solana memory matched almost nothing on the new chain. the structure that finds patterns carried over. the patterns themselves did not.</p>
+<p>same caveat as before. the deployer edge was planted in the simulation. the page proves the mechanism, not the market.</p>
+<h2 id="9-what-the-bee-does-not-do">9. what the bee does not do</h2>
+<p>beebrain is an architecture borrowed from biology. it is not a bee, and it does not give your desk an insect's intuition.</p>
+<ul><li><strong>it is scaled down.</strong> a real bee has about 960,000 neurons. the model runs 2,000 kenyon cells and a few hundred drawn cells for display</li><li><strong>it is not a connectome.</strong> there is no public whole brain honeybee wiring file to load. the lobes, the sparse code and the reward channel follow published biology, the numbers inside are mine</li><li><strong>its scores are not probabilities.</strong> a mushroom value of 0.81 means the sparse code leans toward past prints. it is uncalibrated</li><li><strong>it can only learn edges that exist.</strong> in both simulations i planted the edge. on a live chain the edge may be weaker, slower or gone</li><li><strong>it does not trade for you.</strong> nerve returns a scored feed. no keys, no signatures, no orders. you click</li></ul>
+<p>the animation makes the process visible. it does not make the process right. that has to be earned on live pools with a ghost benchmark running beside it.</p>
+<h2 id="10-what-comes-next">10. what comes next</h2>
+<p>the bee is the first nerve node that learns. the next five builds teach it to work with the models already in the desk.</p>
+<div class="table"><table><thead><tr><th scope="col">build</th><th scope="col">what the bee learns</th></tr></thead><tbody><tr><td>talks to grok</td><td>grok reads the full waggle vector instead of one number, and can wait a cycle when the antennal lobe flags dirty data</td></tr><tr><td>meets jev</td><td>the bee scores after jev, learns when jev is right, and starts predicting jev's answer so repeat calls can be skipped</td></tr><tr><td>routes the models</td><td>the central complex sends each pool to jev, grok or the deep analyst depending on which one wins on that pool type</td></tr><tr><td>opus 5.5 as a sixth lobe</td><td>pools in the unsure zone go to opus, which reads the text the bee cannot: descriptions, twitter, telegram, whois</td></tr><tr><td>the hive</td><td>one bee per chain, solana, robinhood chain and bsc, with separate antennae and a shared mushroom memory</td></tr></tbody></table></div>
+<p>every build ships with its own terminal or node graph, the same way this one did. and every build runs beside the ghost preset, so the bee has to beat a benchmark that buys nothing.</p>
+<p>the fly found one signal. the bee is built to find structure. the market decides whether it is right.</p>
+<p>repo: <a href="https://github.com/h100envy/beebrain">github.com/h100envy/beebrain</a></p>
+<p>built on nerve: <a href="https://github.com/h100envy/nerve">github.com/h100envy/nerve</a></p>
+<h2 id="sources">sources</h2>
+<ul><li><a href="https://bionumbers.hms.harvard.edu/bionumber.aspx?id=109328">honeybee brain: ~960,000 neurons in ~1 mm³ (bionumbers, citing menzel and giurfa 2001)</a></li><li><a href="https://repository.cshl.edu/id/eprint/15381/">the mushroom body: ~175,000 kenyon cells per mushroom body in the bee, ~2,500 in the fly (campbell and turner 2010)</a></li><li><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC6763189">experience and age grow kenyon cell dendrites in foragers (farris et al. 2001)</a></li><li><a href="https://www.frontiersin.org/journals/behavioral-neuroscience/articles/10.3389/fnbeh.2010.00172/pdf">vummx1, octopamine as reward and dopamine as punishment in insect learning (mizunami and matsumoto 2010)</a></li><li><a href="https://www.nature.com/articles/533032a">von frisch and the waggle dance (nature)</a></li><li><a href="https://content.ces.ncsu.edu/honey-bee-dance-language">waggle run duration and distance (nc state extension)</a></li><li>flywire adult fruit fly connectome, nature 2024: 139,255 neurons, about 54.5 million synapses</li></ul>
+</article>
+</main>
+<footer class="foot">
+  <p>beebrain is research and visualisation. synthetic pools, paper account. no keys, no signatures, no orders.</p>
+  <p><a href="https://github.com/h100envy/beebrain">github.com/h100envy/beebrain</a> · built on <a href="https://github.com/h100envy/nerve">nerve</a> · mit license</p>
+</footer>
+</body>
+</html>

@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>robinhood chain · BeeBrain · NERVE</title>
+<meta name="description" content="a honeybee brain, simulated, scoring memecoin pools inside nerve">
+<link rel="canonical" href="https://BEEBRAIN_DOMAIN/robinhood/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="BeeBrain">
+<meta property="og:title" content="BeeBrain · NERVE">
+<meta property="og:description" content="a honeybee brain, simulated, scoring memecoin pools inside nerve">
+<meta property="og:url" content="https://BEEBRAIN_DOMAIN/robinhood/">
+<meta property="og:image" content="https://BEEBRAIN_DOMAIN/assets/brand/cover.png">
+<meta property="og:image:alt" content="a honeycomb brain with the BeeBrain wordmark">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="BeeBrain · NERVE">
+<meta name="twitter:description" content="a honeybee brain, simulated, scoring memecoin pools inside nerve">
+<meta name="twitter:image" content="https://BEEBRAIN_DOMAIN/assets/brand/cover.png">
+<link rel="icon" href="../assets/brand/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="../assets/brand/favicon-32.png">
+<link rel="apple-touch-icon" href="../assets/brand/apple-touch-icon.png">
+<link rel="stylesheet" href="../assets/fonts/fonts.css">
+<style>
+:root{
+  --bg:#07080c; --panel:#10121a; --panel2:#151822; --line:#252a36; --wire:#2c3140;
+  --text:#ecebf2; --dim:#707688; --faint:#3a3f4d;
+  --pink:#ff4fa3; --pinkd:#b0306f; --lime:#ccff3c; --orange:#ffb04a; --violet:#8f84ff;
+  --green:#3fe08a; --red:#ff5468; --sol:#9d7cff;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,monospace; --sans:"Space Grotesk",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){ --bg:#07080c; } }
+:root[data-theme="dark"]{ --bg:#07080c; }
+:root{ box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px); }
+html{ scroll-padding-top:env(safe-area-inset-top,0px); height:100%; }
+*,*:before,*:after{ box-sizing:inherit; }
+html,body{ margin:0; height:100%; background:var(--bg); color:var(--text); overflow:hidden; }
+body{ font-family:var(--mono); }
+#fit{ position:fixed; inset:0; display:flex; align-items:center; justify-content:center; }
+#stage{ width:1600px; height:900px; position:relative; transform-origin:center center; flex:none; }
+
+/* header */
+#hdr{ position:absolute; left:28px; right:28px; top:14px; height:64px; display:flex; align-items:flex-start; justify-content:space-between; }
+#title{ font-family:var(--sans); font-weight:700; font-size:34px; letter-spacing:-.5px; line-height:1; white-space:nowrap; }
+#title .a{ color:var(--sol);} #title .b{ color:var(--lime);} #title .c{ color:var(--pink);} #title .s{ color:var(--dim); font-weight:500; }
+#sub{ font-size:10px; color:var(--dim); letter-spacing:1.6px; margin-top:9px; text-transform:uppercase; }
+#stats{ display:flex; gap:30px; align-items:flex-start; }
+.st .k{ font-size:9px; color:var(--dim); letter-spacing:1.4px; text-transform:uppercase; }
+.st .v{ font-size:19px; font-weight:700; margin-top:4px; font-variant-numeric:tabular-nums; }
+#ctrl{ display:flex; gap:6px; margin-left:10px; }
+#ctrl button{ font:700 10px var(--mono); letter-spacing:1px; color:var(--dim); background:transparent; border:1px solid var(--line); border-radius:12px; padding:6px 11px; cursor:pointer; }
+#ctrl button.on{ background:var(--lime); color:#0b0c10; border-color:var(--lime); }
+#ctrl button:focus-visible{ outline:2px solid var(--pink); outline-offset:2px; }
+#simtag{ position:absolute; right:28px; top:66px; font-size:9px; color:var(--faint); letter-spacing:1px; }
+
+/* column labels */
+.col{ position:absolute; top:92px; font-size:9px; letter-spacing:2px; color:var(--faint); text-transform:uppercase; text-align:center; }
+
+/* phase */
+#phase{ position:absolute; left:28px; top:118px; }
+#phase .t{ color:var(--lime); font-weight:700; font-size:11px; letter-spacing:1.5px; }
+#phase .c{ color:var(--dim); font-size:10px; margin-top:3px; }
+#phase .p{ display:inline-block; margin-top:7px; background:var(--lime); color:#0b0c10; font-size:10px; font-weight:700; padding:4px 8px; border-radius:2px; }
+
+/* wires */
+#wires{ position:absolute; inset:0; pointer-events:none; overflow:visible; }
+#wires path{ fill:none; stroke:var(--wire); stroke-width:1.2; transition:stroke .4s, stroke-width .4s; }
+#wires path.hot{ stroke:var(--lime); stroke-width:2; filter:drop-shadow(0 0 4px rgba(204,255,60,.7)); }
+#wires path.hotp{ stroke:var(--pink); stroke-width:2; filter:drop-shadow(0 0 4px rgba(255,79,163,.7)); }
+#wires path.dash{ stroke-dasharray:4 5; }
+#wires circle{ fill:#fff; filter:drop-shadow(0 0 6px #fff); }
+
+/* nodes */
+.node{ position:absolute; background:var(--panel); border:1px solid var(--line); border-radius:4px; font-size:10px; transition:box-shadow .35s, border-color .35s; overflow:hidden; }
+.node .h{ display:flex; justify-content:space-between; align-items:center; padding:5px 8px; font-weight:700; font-size:11px; color:#0b0c10; }
+.node .h .tag{ font-size:8px; letter-spacing:1px; opacity:.75; }
+.node .b{ padding:6px 8px 7px; }
+.row{ display:flex; justify-content:space-between; gap:8px; line-height:17px; color:var(--dim); white-space:nowrap; }
+.row b{ color:var(--text); font-weight:500; font-variant-numeric:tabular-nums; }
+.node.glow{ border-color:var(--lime); box-shadow:0 0 0 1px var(--lime), 0 0 22px rgba(204,255,60,.35); }
+.node.glowp{ border-color:var(--pink); box-shadow:0 0 0 1px var(--pink), 0 0 22px rgba(255,79,163,.35); }
+.h.sol{ background:#3b3266; color:#e2dcff; } .h.rh{ background:var(--lime); }
+.h.in{ background:#2a2f3c; color:#cfd3dd; } .h.ant{ background:var(--violet); }
+.h.mb{ background:var(--pink); } .h.cx{ background:#6d63d6; color:#fff; }
+.h.mo{ background:#c9364f; color:#fff; } .h.you{ background:var(--orange); }
+.bar{ height:4px; background:#1d212c; border-radius:2px; overflow:hidden; margin:3px 0 5px; }
+.bar i{ display:block; height:100%; background:var(--pink); width:0; transition:width .25s; }
+.feed div{ display:flex; justify-content:space-between; line-height:16px; color:var(--dim); white-space:nowrap; }
+.feed div:first-child{ color:var(--text); }
+.big{ font-family:var(--sans); font-size:30px; font-weight:700; line-height:1.05; font-variant-numeric:tabular-nums; }
+.pill{ display:inline-block; padding:2px 6px; border-radius:2px; font-weight:700; font-size:9px; letter-spacing:1px; }
+canvas{ display:block; }
+
+/* bottom panels */
+.pan{ position:absolute; top:632px; height:246px; background:var(--panel); border:1px solid var(--line); border-radius:4px; padding:10px 12px; font-size:10px; }
+.pan .ph{ display:flex; justify-content:space-between; color:var(--text); font-weight:700; font-size:10px; letter-spacing:1px; margin-bottom:10px; }
+.pan .ph span:last-child{ color:var(--lime); font-weight:500; }
+.skipcol{ display:flex; align-items:flex-end; gap:12px; height:170px; }
+.skipcol .c{ flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; height:100%; color:var(--dim); }
+.skipcol .c i{ display:block; width:100%; background:var(--faint); border-radius:2px 2px 0 0; transition:height .3s; }
+.skipcol .c.cur i{ background:var(--lime); }
+.skipcol .c span{ margin-top:5px; } .skipcol .c em{ font-style:normal; color:var(--text); margin-bottom:4px; }
+.dstat .row{ line-height:16px; }
+.dstat .dot{ display:inline-block; width:6px; height:6px; border-radius:50%; margin-left:6px; background:var(--faint); }
+@media (prefers-reduced-motion: reduce){ #wires circle{ display:none; } }
+</style>
+</head>
+<body>
+<div id="fit"><div id="stage">
+
+<div id="hdr">
+  <div>
+    <div id="title">Beebrain <span class="s">·</span> <span class="a">solana</span> <span class="s">→</span> <span class="b">robinhood chain</span> <span class="s">→</span> <span class="c">you</span></div>
+    <div id="sub">trained on solana. first contact with a chain it never saw. the structure that finds patterns transfers.</div>
+  </div>
+  <div id="stats">
+    <div class="st"><div class="k">pools seen</div><div class="v" id="sPools">0</div></div>
+    <div class="st"><div class="k">skip rate</div><div class="v" id="sSkip" style="color:var(--pink)">0%</div></div>
+    <div class="st"><div class="k">trades</div><div class="v" id="sTrades">0</div></div>
+    <div class="st"><div class="k">wins</div><div class="v" id="sWins" style="color:var(--green)">0</div></div>
+    <div class="st"><div class="k">noise</div><div class="v" id="sNoise" style="color:var(--violet)">0.00</div></div>
+    <div class="st"><div class="k">account</div><div class="v" id="sEq" style="color:var(--lime)">$300</div></div>
+    <div id="ctrl">
+      <button data-sp="1" class="on">1x</button><button data-sp="4">4x</button><button data-sp="16">16x</button><button id="rst">restart</button>
+    </div>
+  </div>
+</div>
+<div id="simtag">sim run · synthetic pools · seed <span id="seedv"></span></div>
+
+<div class="col" style="left:24px;width:170px">source</div>
+<div class="col" style="left:222px;width:170px">spawn</div>
+<div class="col" style="left:420px;width:190px">antennal lobes</div>
+<div class="col" style="left:638px;width:270px">mushroom bodies</div>
+<div class="col" style="left:936px;width:180px">central complex</div>
+<div class="col" style="left:1144px;width:190px">motor</div>
+<div class="col" style="left:1362px;width:214px">you</div>
+
+<div id="phase"><div class="t" id="phT">DAY 1/6 · FIRST CONTACT</div><div class="c" id="phC">every pool is new. the bee trusts nothing.</div><div class="p" id="phP">bee · explore lock</div></div>
+
+<svg id="wires" width="1600" height="900"></svg>
+
+<!-- source -->
+<div class="node" id="nSol" style="left:24px;top:182px;width:170px">
+  <div class="h sol">solana <span class="tag">TRAINED</span></div>
+  <div class="b">
+    <div class="row">pools/min <b>7.5</b></div>
+    <div class="row">patterns <b id="solPat">3,000</b></div>
+    <div class="row">matched here <b id="solHit">0</b></div>
+  </div>
+</div>
+<div class="node" id="nRh" style="left:24px;top:282px;width:170px">
+  <div class="h rh">robinhood chain <span class="tag">LIVE</span></div>
+  <div class="b">
+    <div class="row">chain age <b>2 wks</b></div>
+    <div class="row">memecoin share <b>85%</b></div>
+    <div class="row">new pool every <b>2 s</b></div>
+    <div class="row">deployers seen <b id="rhDep">0</b></div>
+  </div>
+</div>
+
+<!-- spawn -->
+<div class="node" id="nSpawn" style="left:222px;top:222px;width:170px">
+  <div class="h in">pool spawn <span class="tag">IN</span></div>
+  <div class="b feed" id="feed"></div>
+</div>
+
+<!-- the brain itself -->
+<div class="node" id="nBrain" style="left:24px;top:408px;width:368px;height:214px;background:#05060a">
+  <div class="h in" style="background:#1a1d27;color:#e6e4ee">bee brain <span class="tag" id="brainStage">TERMINAL · IDLE</span></div>
+  <canvas id="brain" width="366" height="190"></canvas>
+</div>
+
+<!-- antennal -->
+<div class="node" id="nNoise" style="left:420px;top:185px;width:190px">
+  <div class="h ant">noise filter <span class="tag">ANTENNAL</span></div>
+  <div class="b">
+    <div class="row">noise now <b id="noiseV">0.71</b></div>
+    <div class="bar"><i id="noiseB" style="background:var(--violet)"></i></div>
+    <div class="row">solana baseline <b>0.28</b></div>
+    <div class="row">adapting <b id="adaptV">0%</b></div>
+  </div>
+</div>
+<div class="node" id="nGlom" style="left:420px;top:345px;width:190px">
+  <div class="h ant">glomeruli <span class="tag">8 FEATURES</span></div>
+  <div class="b" id="glom"></div>
+</div>
+
+<!-- mushroom -->
+<div class="node" id="nKc" style="left:638px;top:150px;width:270px">
+  <div class="h mb">kenyon cells <span class="tag">SPARSE 5%</span></div>
+  <div class="b">
+    <canvas id="kc" width="254" height="92"></canvas>
+    <div class="row" style="margin-top:5px">robinhood patterns <b id="kcPat">0</b></div>
+    <div class="row">trained toward print <b id="kcHi">0</b></div>
+  </div>
+</div>
+<div class="node" id="nDep" style="left:638px;top:340px;width:270px">
+  <div class="h mb">deployer clusters <span class="tag" id="depTag">SEARCHING</span></div>
+  <div class="b">
+    <canvas id="dep" width="254" height="96"></canvas>
+    <div id="depList"></div>
+  </div>
+</div>
+
+<!-- central -->
+<div class="node" id="nCx" style="left:936px;top:230px;width:180px">
+  <div class="h cx">central complex <span class="tag">CX</span></div>
+  <div class="b">
+    <canvas id="ring" width="164" height="96"></canvas>
+    <div class="row">mode <b id="cxMode">explore lock</b></div>
+    <div class="row">explore <b id="cxEps">50%</b></div>
+    <div class="row">score <b id="cxScore">0.00</b></div>
+  </div>
+</div>
+
+<!-- motor -->
+<div class="node" id="nMo" style="left:1144px;top:200px;width:190px">
+  <div class="h mo">verdict <span class="tag">SEG</span></div>
+  <div class="b">
+    <div class="big" id="verdict" style="color:var(--dim)">-</div>
+    <div class="row" style="margin-top:4px">pool <b id="moPool">-</b></div>
+    <div class="row">skip today <b id="moSkip">0%</b></div>
+  </div>
+</div>
+<div class="node" id="nOpen" style="left:1144px;top:345px;width:190px">
+  <div class="h mo">open <span class="tag">MAX 4</span></div>
+  <div class="b feed" id="open"></div>
+</div>
+
+<!-- you -->
+<div class="node" id="nYou" style="left:1362px;top:200px;width:214px">
+  <div class="h you">you <span class="tag">I CLICK</span></div>
+  <div class="b">
+    <div class="row">entries clicked <b id="youClick">0</b></div>
+    <div class="row">from deployer pattern <b id="youDep">0</b></div>
+    <div class="row">last <b id="youLast">-</b></div>
+    <div class="row">next click in <b id="youNext">0</b></div>
+  </div>
+</div>
+<div class="node" id="nAcct" style="left:1362px;top:330px;width:214px">
+  <div class="h you">account <span class="tag">SIM</span></div>
+  <div class="b">
+    <div class="big" id="acct" style="color:var(--lime)">$300</div>
+    <div class="row" style="margin-top:2px">from $300 <b id="acctPct">+0%</b></div>
+    <canvas id="eq" width="198" height="60" style="margin-top:6px"></canvas>
+  </div>
+</div>
+
+<!-- bottom -->
+<div class="pan" style="left:24px;width:300px">
+  <div class="ph"><span>// skip rate by day</span><span>d1 → d6</span></div>
+  <div class="skipcol" id="skipDays" style="height:118px"></div>
+  <div class="row" style="margin-top:10px">rolling skip, last 200 pools <b id="rollSkip">0%</b></div>
+  <canvas id="rollCv" width="276" height="44"></canvas>
+</div>
+<div class="pan" style="left:336px;width:300px">
+  <div class="ph"><span>// deployer pattern</span><span id="dpHead">not found</span></div>
+  <div class="big" id="dpBig" style="color:var(--dim)">0 of 0</div>
+  <div class="row" style="margin-top:4px">trades on a known deployer</div>
+  <div class="bar" style="height:6px;margin-top:10px"><i id="dpBar" style="background:var(--lime)"></i></div>
+  <div class="row" style="margin-top:10px">other trades <b id="dpOther">0 of 0</b></div>
+  <div class="row">clusters confirmed <b id="dpConf">0</b></div>
+  <div class="row">this pool's deployer <b id="dpNow">-</b></div>
+  <canvas id="dpCv" width="276" height="40" style="margin-top:6px"></canvas>
+</div>
+<div class="pan" style="left:648px;width:300px">
+  <div class="ph"><span>// lobe load</span><span>live</span></div>
+  <canvas id="loadCv" width="276" height="150"></canvas>
+  <div class="row" style="margin-top:6px">pools per second <b id="pps">0</b></div>
+  <div class="row">spikes <b id="spikes">0</b></div>
+</div>
+<div class="pan" style="left:960px;width:300px">
+  <div class="ph"><span>// events</span><span>in order</span></div>
+  <div class="row" style="border-bottom:1px solid var(--line);padding-bottom:5px;margin-bottom:6px">now <b id="evNow">-</b></div>
+  <div class="feed" id="events"></div>
+</div>
+<div class="pan dstat" style="left:1272px;width:304px">
+  <div class="ph"><span>// day status</span><span id="dayOf">1/6</span></div>
+  <div id="days"></div>
+</div>
+
+</div></div>
+
+<script>
+(function(){
+"use strict";
+// ---------------------------------------------------------------- setup
+const $ = id => document.getElementById(id);
+const stage = $("stage");
+function fit(){
+  const s = Math.min(innerWidth/1600, innerHeight/900);
+  stage.style.transform = "scale(" + s + ")";
+}
+addEventListener("resize", fit); fit();
+
+let seed = 11;
+function mulberry(a){ return function(){ a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+let R = mulberry(seed);
+const clamp = (v,a=0,b=1)=>Math.max(a,Math.min(b,v));
+const money = v => "$" + Math.round(v).toLocaleString("en-US");
+const FEATS = ["liquidity","holders","snipers","bundle","creator age","heat","accel","volume"];
+const SYL = ["zor","ka","neo","pip","mo","rex","lu","ba","tron","fi","gor","wen","kit","ra","vex","nu","hood","chi","bon","gm"];
+const HEX = "0123456789abcdef";
+const PPD = 570;            // pools per sim day
+const DAYS = 6;
+const START = 300;
+const N_KC = 1200, KC_FAN = 6, KC_ACT = 60;
+
+const PHASES = [
+  ["DAY 1/6 · FIRST CONTACT", "every pool is new. the bee trusts nothing.", "bee · explore lock"],
+  ["DAY 2/6 · A SHAPE APPEARS", "wallets keep coming from the same deployer contracts.", "bee · clustering by contract"],
+  ["DAY 3/6 · PATTERN CONFIRMED", "known deployers start carrying the score.", "bee · trades the cluster"],
+  ["DAY 4/6 · NOISE DROPS", "the antennal lobes have learned this chain's baseline.", "bee · explore fading"],
+  ["DAY 5/6 · EXPLOIT", "skip rate settles. the bee trades what it knows.", "bee · exploit"],
+  ["DAY 6/6 · TRANSFER", "no solana pattern did this. the learning structure did.", "bee · local memory"],
+];
+
+// ---------------------------------------------------------------- state
+let S;
+function reset(){
+  R = mulberry(seed);
+  $("seedv").textContent = seed;
+  const deps = [];
+  for (let i=0;i<70;i++){
+    const reuse = i < 6;
+    deps.push({ id:"0x"+Array.from({length:4},()=>HEX[Math.floor(R()*16)]).join("")+"…"+Array.from({length:2},()=>HEX[Math.floor(R()*16)]).join(""),
+      w: reuse ? 2 : 1, p: reuse ? 0.7 + R()*0.12 : 0.12 + R()*0.2, n:0, won:0, pools:0, conf:false, confDay:0 });
+  }
+  const kcIn = Array.from({length:N_KC}, ()=>{ const s=new Set(); while(s.size<KC_FAN) s.add(Math.floor(R()*32)); return [...s]; });
+  S = { seen:0, day:1, deps, wsum: deps.reduce((a,d)=>a+d.w,0), kcIn, kcTie: Array.from({length:N_KC},()=>R()*0.01),
+        kcW: new Float32Array(N_KC).fill(0.5), kcAct:new Float32Array(N_KC), patterns:0, solHit:0,
+        cash:START, open:[], closed:[], eqHist:[START], trades:0, wins:0, clicks:0, depTrades:0, depWins:0, othTrades:0, othWins:0,
+        daySeen:new Array(DAYS+1).fill(0), daySkip:new Array(DAYS+1).fill(0), skipsTotal:0,
+        pending:[], feed:[], events:[], cur:null, eps:0.5, resolved:0, done:false, load:{ant:0,mb:0,cx:0,mo:0},
+        confirmedCount:0, obsN:0, obsW:0, nextClick:0, recent:[], rollHist:[], dpHist:[] };
+  $("verdict").textContent = "-"; $("verdict").style.color = "var(--dim)";
+  event("robinhood chain connected. 0 local patterns.", "var(--lime)");
+}
+function event(t, col){ S.events.unshift([stamp(), t, col||"var(--dim)"]); S.events = S.events.slice(0,9); }
+function stamp(){ const d = Math.floor(S.seen/PPD)+1; const m = Math.floor((S.seen%PPD)/PPD*1440); return "d"+Math.min(d,DAYS)+" "+String(Math.floor(m/60)).padStart(2,"0")+":"+String(m%60).padStart(2,"0"); }
+function equity(){ return S.cash + S.open.reduce((a,p)=>a + p.size*(1+p.path[Math.min(p.age,p.life)]), 0); }
+
+function pickDep(){ let r = R()*S.wsum; for (const d of S.deps){ r -= d.w; if (r<=0) return d; } return S.deps[0]; }
+
+function noiseNow(){ return 0.28 + 0.43*Math.exp(-S.seen/1100); }
+const LOCK = 0.52;   // antennal noise above this: the bee cannot bind contract identity yet
+
+function code(obs){
+  const on = new Set(); FEATS.forEach((f,i)=>on.add(i*4+Math.min(3,Math.floor(obs[f]*4))));
+  const sc = []; for (let k=0;k<N_KC;k++){ let c=S.kcTie[k]; for (const j of S.kcIn[k]) if (on.has(j)) c++; sc.push([c,k]); }
+  sc.sort((a,b)=>b[0]-a[0]); return sc.slice(0,KC_ACT).map(x=>x[1]);
+}
+
+function spawn(){
+  S.seen++;
+  const day = Math.min(DAYS, Math.floor((S.seen-1)/PPD)+1);
+  if (day !== S.day){ S.day = day; event("day "+day+" starts", "var(--text)"); }
+  const d = pickDep(); d.pools++;
+  const nz = noiseNow();
+  const t = { liquidity:R()**0.8, holders:R(), snipers:R()**1.6, bundle: R()<0.2?1:0, "creator age":R()**1.3, heat:R(), accel:R(), volume:R() };
+  const obs = {}; for (const f of FEATS) obs[f] = f==="bundle" ? t[f] : clamp(t[f] + (R()-0.5)*nz*0.6);
+  let p = clamp(d.p + 0.1*(t["creator age"]-0.5) - 0.1*t.snipers - 0.25*t.bundle + (R()-0.5)*0.1, 0.02, 0.95);
+  const name = ("$"+Array.from({length:R()<0.4?1:2},()=>SYL[Math.floor(R()*SYL.length)]).join("")).toUpperCase().slice(0,9);
+  const addr = "0x"+Array.from({length:4},()=>HEX[Math.floor(R()*16)]).join("");
+  // brain
+  const act = code(obs);
+  let mv = 0; for (const k of act) mv += S.kcW[k]; mv /= KC_ACT;
+  const mb = clamp(0.5 + (mv-0.5)*2.2);
+  if (R() < 0.012) S.solHit++;                       // solana memory rarely fits this chain
+  const base = S.obsN ? S.obsW/S.obsN : 0.3;
+  const depScore = d.conf ? clamp(0.5 + ((d.won+1)/(d.n+2) - base)*2.5) : 0.5;
+  const comb = 0.33*mb + 0.47*depScore + 0.2*(1-nz) + 0.1*(obs["creator age"]-0.5) + 0.06*(obs.liquidity-0.5);
+  const lock = nz > LOCK;
+  const mode = lock ? "explore lock" : (S.eps > 0.15 ? "explore" : "exploit");
+  const thr = lock ? 0.66 : 0.59;
+  const watchAt = lock ? 0.5 : 0.465;
+  let verdict = obs.bundle ? "SKIP" : (comb >= thr ? "PASS" : (comb >= watchAt ? "WATCH" : "SKIP"));
+  const pool = { name, addr, dep:d, obs, p, act, mb, depScore, comb, mode, verdict, nz };
+  S.daySeen[day]++; if (verdict==="SKIP"){ S.daySkip[day]++; S.skipsTotal++; }
+  S.recent.push(verdict==="SKIP"?1:0); if (S.recent.length>200) S.recent.shift();
+  if (S.seen % 10 === 0){ S.rollHist.push(S.recent.reduce((a,b)=>a+b,0)/S.recent.length); if (S.rollHist.length>276) S.rollHist.shift(); }
+  let explore = false;
+  if (verdict==="WATCH" && R() < (lock ? 0.03 : S.eps*0.05)) explore = true;
+  if ((verdict==="PASS" || explore) && S.open.length < 4 && S.seen >= S.nextClick){
+    S.nextClick = S.seen + 90;
+    const size = Math.min(S.cash, equity()*(explore?0.04:0.13));
+    if (size >= 3){ openPos(pool, size, explore); }
+  } else {
+    // the bee watches a few skipped pools to see what happened
+    if (R() < 0.35) S.pending.push({ due:S.seen + 20 + Math.floor(R()*50), d, act, won: R() < p });
+  }
+  S.feed.unshift(pool); S.feed = S.feed.slice(0,7);
+  return pool;
+}
+
+function openPos(pool, size, explore){
+  S.cash -= size; S.clicks++;
+  const won = R() < pool.p;
+  const fin = won ? 0.35 + R()*1.4 : -(0.3 + R()*0.45);
+  const life = 30 + Math.floor(R()*70);
+  const steps=[0]; for (let i=0;i<life;i++) steps.push(steps[i] + (R()-0.5)*0.22);
+  const path = steps.map((s,t)=>Math.max(-0.95, fin*t/life + s - steps[life]*t/life));
+  S.open.push({ pool, size, explore, won, fin, life, path, age:0, onDep: pool.dep.conf });
+  $("youLast").textContent = pool.name;
+  if (pool.dep.conf) $("youDep").textContent = (++S.depClicks||(S.depClicks=1));
+  event(pool.name+" "+(explore?"explore":"pass")+" "+money(size)+(pool.dep.conf?"  known deployer":""), "var(--text)");
+}
+
+function tickPositions(){
+  const keep=[];
+  for (const p of S.open){
+    p.age++;
+    if (p.age >= p.life){
+      const out = p.size*(1+p.fin)*0.98; S.cash += out;
+      const pnl = out - p.size, w = pnl > 0;
+      S.trades++; if (w) S.wins++;
+      if (p.onDep){ S.depTrades++; if (w) S.depWins++; S.dpHist.push(w?1:0); } else { S.othTrades++; if (w) S.othWins++; }
+      learn(p.pool.act, w, 0.25); depLearn(p.pool.dep, w);
+      S.resolved++; S.eps = Math.max(0.05, 0.5*Math.exp(-S.resolved/12));
+      S.closed.push(pnl);
+      event(p.pool.name+" closed "+(p.fin>0?"+":"")+Math.round(p.fin*100)+"%  "+(pnl>=0?"+":"-")+money(Math.abs(pnl)), w?"var(--green)":"var(--red)");
+    } else keep.push(p);
+  }
+  S.open = keep;
+  const still=[];
+  for (const g of S.pending){ if (S.seen >= g.due){ learn(g.act, g.won, 0.06); depLearn(g.d, g.won); } else still.push(g); }
+  S.pending = still;
+  const e = equity(); if (S.seen % 6 === 0) S.eqHist.push(e); if (S.eqHist.length > 400) S.eqHist.shift();
+}
+function learn(act, won, lr){ const r = won?1:0; for (const k of act) S.kcW[k] += lr*(r - S.kcW[k]); S.patterns++; }
+function depLearn(d, won){
+  d.n++; if (won) d.won++; S.obsN++; if (won) S.obsW++;
+  if (!d.conf && noiseNow() < LOCK && d.n >= 6 && (d.won+1)/(d.n+2) >= 0.6){
+    d.conf = true; d.confDay = S.day; S.confirmedCount++;
+    event("pattern: deployer "+d.id+" reused, "+d.won+" of "+d.n+" printed", "var(--lime)");
+  }
+}
+
+// ---------------------------------------------------------------- wires
+const svg = $("wires");
+const NS = "http://www.w3.org/2000/svg";
+const W = [
+  ["nRh","nSpawn","l"], ["nSol","nKc","dash"], ["nSpawn","nBrain","l"], ["nSpawn","nNoise","l"], ["nSpawn","nGlom","l"],
+  ["nNoise","nKc","l"], ["nGlom","nKc","l"], ["nGlom","nDep","l"], ["nKc","nCx","p"], ["nDep","nCx","p"],
+  ["nCx","nMo","p"], ["nMo","nOpen","p"], ["nMo","nYou","p"], ["nOpen","nAcct","p"], ["nYou","nAcct","p"]
+];
+const wires = {};
+function box(id){ const e=$(id); return { x:e.offsetLeft, y:e.offsetTop, w:e.offsetWidth, h:e.offsetHeight }; }
+function drawWires(){
+  svg.innerHTML = "";
+  for (const [a,b,k] of W){
+    const A=box(a), B=box(b);
+    let x1,y1,x2,y2;
+    if (a==="nMo" && b==="nOpen"){ x1=A.x+A.w/2; y1=A.y+A.h; x2=B.x+B.w/2; y2=B.y; }
+    else if (a==="nYou" && b==="nAcct"){ x1=A.x+A.w/2; y1=A.y+A.h; x2=B.x+B.w/2; y2=B.y; }
+    else if (b==="nBrain"){ x1=A.x+A.w/2; y1=A.y+A.h; x2=B.x+B.w*0.8; y2=B.y; }
+    else { x1=A.x+A.w; y1=A.y+A.h/2; x2=B.x; y2=B.y+B.h/2; }
+    const vert = x1===x2 || Math.abs(x2-x1)<4;
+    const d = vert ? `M${x1},${y1} L${x2},${y2}` : `M${x1},${y1} C${x1+(x2-x1)*0.5},${y1} ${x1+(x2-x1)*0.5},${y2} ${x2},${y2}`;
+    const p = document.createElementNS(NS,"path"); p.setAttribute("d",d); if (k==="dash") p.classList.add("dash");
+    svg.appendChild(p); wires[a+">"+b] = { el:p, kind:k, len:0 };
+  }
+  for (const k in wires) wires[k].len = wires[k].el.getTotalLength();
+}
+const pulses=[];
+function fire(a,b,delay){
+  const w = wires[a+">"+b]; if (!w) return;
+  setTimeout(()=>{
+    w.el.classList.add(w.kind==="p"?"hotp":"hot");
+    const c = document.createElementNS(NS,"circle"); c.setAttribute("r","3"); svg.appendChild(c);
+    pulses.push({ w, c, t0:performance.now(), dur:380 });
+    setTimeout(()=>w.el.classList.remove("hot","hotp"), 650);
+  }, delay);
+}
+function glow(id, delay, pink){ setTimeout(()=>{ const e=$(id); e.classList.add(pink?"glowp":"glow"); setTimeout(()=>e.classList.remove("glow","glowp"), 700); }, delay); }
+
+function showcase(pool){
+  const gap = 170;
+  glow("nRh",0); fire("nRh","nSpawn",0);
+  glow("nSpawn",gap); fire("nSpawn","nNoise",gap); fire("nSpawn","nGlom",gap); fire("nSpawn","nBrain",gap); glow("nBrain",gap,true);
+  glow("nNoise",gap*2); glow("nGlom",gap*2); fire("nNoise","nKc",gap*2); fire("nGlom","nKc",gap*2); fire("nGlom","nDep",gap*2);
+  if (S.solHit && Math.random()<0.2) fire("nSol","nKc",gap*2);
+  glow("nKc",gap*3,true); glow("nDep",gap*3,true); fire("nKc","nCx",gap*3); fire("nDep","nCx",gap*3);
+  glow("nCx",gap*4,true); fire("nCx","nMo",gap*4);
+  glow("nMo",gap*5,true);
+  if (pool.verdict==="PASS"){ fire("nMo","nYou",gap*5); fire("nMo","nOpen",gap*5); glow("nYou",gap*6); fire("nYou","nAcct",gap*6); glow("nAcct",gap*7); }
+  setTimeout(()=>{ BR.excite("antennal", (i,q)=>0.35 + 0.6*pool.obs[FEATS[i % 8]]); }, gap);
+  setTimeout(()=>{ BR.excite("optic", (i,q)=>0.3 + 0.7*Math.max(0, Math.sin(q.y*0.9 + pool.obs.heat*6)) * (0.4 + pool.obs.heat)); }, gap*2);
+  setTimeout(()=>{ const A = new Set(pool.act); BR.excite("mushroom", (i,q)=> (A.has((i*37) % N_KC) || A.has((i*37+1) % N_KC) || A.has((i*37+2) % N_KC)) ? 1 : 0.06); }, gap*3);
+  setTimeout(()=>{ const xs = BR.cells.central.map(q=>q.x), lo=Math.min(...xs), hi=Math.max(...xs), pos = lo + (hi-lo)*clamp((pool.comb-0.3)/0.5);
+                   BR.excite("central", (i,q)=>Math.exp(-((q.x-pos)**2)/4)); }, gap*4);
+  setTimeout(()=>{ BR.setMotor(pool.verdict==="PASS"?[63,224,138]:(pool.verdict==="SKIP"?[255,84,104]:[255,176,74])); BR.excite("motor", ()=>1); }, gap*5);
+  setTimeout(()=>{ S.cur = pool; S.kcShow = new Set(pool.act); S.kcFlash = 1; }, gap*3);
+  setTimeout(()=>{ S.shown = pool; }, gap*5);
+}
+
+
+// ---------------------------------------------------------------- brain terminal
+const BR = (function(){
+  const cv = $("brain"), c = cv.getContext("2d");
+  const CW = 6, CH = 9.6, COLS = 61, ROWS = 19, OX = 30, OY = 9.5;
+  const REG = {
+    optic:    { e:[[-22,0.5,6.5,6.5],[22,0.5,6.5,6.5]], col:[157,124,255] },
+    mushroom: { e:[[-13,-6,3.2,1.8],[-4.5,-6.8,2.6,1.5],[4.5,-6.8,2.6,1.5],[13,-6,3.2,1.8]], col:[255,79,163] },
+    central:  { e:[[0,-1,6.5,1.6]], col:[143,132,255] },
+    antennal: { e:[[-6.5,4,3.6,1.7],[6.5,4,3.6,1.7]], col:[143,132,255] },
+    motor:    { e:[[0,7.6,4,1.3]], col:[255,84,104] },
+  };
+  const cells = {}, rims = {};
+  for (const k in REG){
+    cells[k] = []; const pts = new Set();
+    for (const [x0,y0,rx,ry] of REG[k].e){
+      for (let y=Math.ceil(y0-ry); y<=Math.floor(y0+ry); y++) for (let x=Math.ceil(x0-rx); x<=Math.floor(x0+rx); x++)
+        if (((x-x0)/(rx+.4))**2 + ((y-y0)/(ry+.4))**2 <= 1) cells[k].push({x,y,a:0});
+      for (let i=0;i<120;i++){ const t=i/120*6.283; pts.add(Math.round(x0+(rx+1.3)*Math.cos(t))+","+Math.round(y0+(ry+0.9)*Math.sin(t))); }
+    }
+    const inside = new Set(cells[k].map(q=>q.x+","+q.y));
+    rims[k] = [...pts].filter(q=>!inside.has(q)).map(q=>q.split(",").map(Number));
+  }
+  const TR = [["antennal","mushroom",[-7,2],[-12,-4]],["antennal","mushroom",[7,2],[12,-4]],
+    ["optic","mushroom",[-16,-3],[-15,-5]],["optic","mushroom",[16,-3],[15,-5]],
+    ["optic","central",[-15,0],[-7,-1]],["optic","central",[15,0],[7,-1]],
+    ["mushroom","central",[-9,-5],[-4,-2]],["mushroom","central",[9,-5],[4,-2]],
+    ["central","motor",[0,1],[0,6]],["antennal","motor",[-3,5],[-2,7]],["antennal","motor",[3,5],[2,7]]]
+    .map(([a,b,p,q])=>{ const n=Math.max(Math.abs(q[0]-p[0]),Math.abs(q[1]-p[1]),1); const pts=[];
+      for (let i=0;i<=n;i++) pts.push([Math.round(p[0]+(q[0]-p[0])*i/n), Math.round(p[1]+(q[1]-p[1])*i/n)]); return {a,b,pts}; });
+  const glow = {optic:0,mushroom:0,central:0,antennal:0,motor:0};
+  const pulses = []; let motorCol = null, spikes = 0, stage = "idle";
+  function excite(k, fn){ glow[k] = 1; stage = k; cells[k].forEach((q,i)=>{ q.a = Math.max(q.a, fn(i,q)); });
+    for (const t of TR) if (t.a===k) for (let j=0;j<3;j++){ pulses.push({t, i:-j*2}); spikes++; } }
+  function step(){
+    for (const k in cells){ glow[k] *= 0.965; const floor = k==="mushroom" ? 0.08+0.06*glow[k] : 0.12+0.22*glow[k];
+      for (const q of cells[k]){ q.a = Math.max(floor, q.a*0.9); if (Math.random()<0.018){ q.a = Math.max(q.a, 0.35+Math.random()*0.35); spikes++; } } }
+    for (let i=pulses.length-1;i>=0;i--){ pulses[i].i += 0.5; if (pulses[i].i >= pulses[i].t.pts.length) pulses.splice(i,1); }
+  }
+  function px(x,y){ return [(x+OX)*CW+3, (y+OY)*CH+8]; }
+  function draw(){
+    c.fillStyle = "#05060a"; c.fillRect(0,0,366,190);
+    c.font = "9px JetBrains Mono, ui-monospace, monospace"; c.textAlign = "center"; c.textBaseline = "middle";
+    const dot = (X,Y,r)=>{ c.beginPath(); c.arc(X,Y,r,0,6.283); c.fill(); };
+    for (const t of TR) for (const [x,y] of t.pts){ const [X,Y]=px(x,y); c.fillStyle="rgba(176,48,111,.6)"; dot(X,Y,0.9); }
+    for (const k in rims){ const g = glow[k], [r,gg,b] = REG[k].col;
+      c.fillStyle = `rgba(${r},${gg},${b},${0.3+0.7*g})`; for (const [x,y] of rims[k]){ const [X,Y]=px(x,y); dot(X,Y,0.9+0.5*g); } }
+    for (const k in cells){ const [r,g,b] = (k==="motor" && motorCol) ? motorCol : REG[k].col;
+      for (const q of cells[k]){ const a=q.a, [X,Y]=px(q.x,q.y);
+        const lift = a>0.8 ? 110 : (a>0.55 ? 40 : 0);
+        c.fillStyle = `rgba(${Math.min(255,r+lift)},${Math.min(255,g+lift)},${Math.min(255,b+lift)},${0.35+0.65*a})`;
+        if (a > 0.8){ c.shadowColor = `rgb(${r},${g},${b})`; c.shadowBlur = 6; }
+        dot(X, Y, 1.1 + 2.1*a);
+        c.shadowBlur = 0; } }
+    for (const p of pulses){ const i=Math.floor(p.i); if (i<0) continue; const [x,y]=p.t.pts[i]; const [X,Y]=px(x,y);
+      c.fillStyle="#fff"; c.shadowColor="#fff"; c.shadowBlur=8; dot(X,Y,2.6); c.shadowBlur=0; }
+    c.textAlign="left"; c.font = "9px JetBrains Mono, ui-monospace, monospace"; c.fillStyle="#4a5060";
+    const lab=[["optic",-29,-8],["optic",16,-8],["mushroom bodies",-7,-9.3],["central complex",-7,1.4],["antennal",-16,6.6],["motor",5,8.9]];
+    for (const [t,x,y] of lab){ const [X,Y]=px(x,y); const k = t.split(" ")[0]==="mushroom"?"mushroom":(t.startsWith("central")?"central":t);
+      c.fillStyle = stage===k && glow[k]>0.5 ? "#ff4fa3" : "#6b7182"; c.fillText(t, X-3, Y); }
+  }
+  function level(k){ let s=0; for (const q of cells[k]) s+=q.a; return s/cells[k].length; }
+  return { cells, excite, step, draw, level, setMotor:(col)=>{ motorCol=col; }, spikes:()=>spikes, stage:()=>stage };
+})();
+const traces = {antennal:[],optic:[],mushroom:[],central:[],motor:[]};
+
+// ---------------------------------------------------------------- draw
+const kcCv = $("kc").getContext("2d"), depCv = $("dep").getContext("2d"), ringCv = $("ring").getContext("2d"), eqCv = $("eq").getContext("2d");
+function drawKc(){
+  const c = kcCv, cols = 42, rows = 15, cw = 254/cols, ch = 92/rows;
+  c.clearRect(0,0,254,92);
+  const show = S.kcShow || new Set();
+  for (let r=0;r<rows;r++) for (let q=0;q<cols;q++){
+    const k = (r*cols+q)*2 % N_KC; const k2 = k+1;
+    const on = show.has(k) || show.has(k2);
+    const w = S.kcW[k];
+    let col;
+    if (on && S.kcFlash > 0.05){ col = `rgba(255,${Math.round(120+100*S.kcFlash)},${Math.round(190+40*S.kcFlash)},${0.55+0.45*S.kcFlash})`; }
+    else if (w > 0.6) col = "rgba(204,255,60,.35)";
+    else if (w < 0.4) col = "rgba(255,84,104,.18)";
+    else col = "rgba(255,79,163,.12)";
+    c.fillStyle = col; c.beginPath(); c.arc(q*cw+cw/2, r*ch+ch/2, on && S.kcFlash>0.05 ? 2.4 : 1.5, 0, 6.283); c.fill();
+  }
+  S.kcFlash = (S.kcFlash||0)*0.965;
+}
+function drawDep(){
+  const c = depCv; c.clearRect(0,0,254,96);
+  const top = [...S.deps].sort((a,b)=>b.pools-a.pools).slice(0,5);
+  top.forEach((d,i)=>{
+    const cx = 26 + i*50, cy = 48;
+    const n = Math.min(d.pools, 26);
+    for (let j=0;j<n;j++){
+      const a = j/n*6.283 + performance.now()/4000*(i%2?1:-1), rr = 17 + (j%3)*5;
+      c.fillStyle = d.conf ? "rgba(204,255,60,.75)" : "rgba(143,132,255,.45)";
+      c.beginPath(); c.arc(cx+Math.cos(a)*rr*0.9, cy+Math.sin(a)*rr, 1.3, 0, 6.283); c.fill();
+      if (d.conf && j%4===0){ c.strokeStyle="rgba(204,255,60,.18)"; c.beginPath(); c.moveTo(cx,cy); c.lineTo(cx+Math.cos(a)*rr*0.9, cy+Math.sin(a)*rr); c.stroke(); }
+    }
+    c.fillStyle = d.conf ? "#ccff3c" : "#3a3f4d";
+    c.beginPath(); c.arc(cx, cy, 5 + Math.min(5, d.pools/12), 0, 6.283); c.fill();
+    if (S.cur && S.cur.dep === d){ c.strokeStyle="#ff4fa3"; c.lineWidth=1.5; c.beginPath(); c.arc(cx,cy,13,0,6.283); c.stroke(); c.lineWidth=1; }
+  });
+  const list = top.slice(0,3).map(d=>`<div class="row">${d.id} <b style="color:${d.conf?"var(--lime)":"var(--dim)"}">${d.pools} pools · ${d.n?Math.round(100*d.won/d.n):0}%</b></div>`).join("");
+  $("depList").innerHTML = list;
+  $("depTag").textContent = S.confirmedCount ? S.confirmedCount+" CONFIRMED" : "SEARCHING";
+}
+function drawRing(){
+  const c = ringCv; c.clearRect(0,0,164,96);
+  const cx=82, cy=48, r=34;
+  for (let i=0;i<16;i++){
+    const a = -Math.PI/2 + i/16*6.283;
+    const sc = S.shown ? S.shown.comb : 0.4;
+    const pos = clamp((sc-0.3)/0.5)*16;
+    const d = Math.min(Math.abs(i-pos), 16-Math.abs(i-pos));
+    const v = Math.exp(-d*d/3);
+    c.fillStyle = `rgba(255,79,163,${0.12+0.85*v})`;
+    c.beginPath(); c.arc(cx+Math.cos(a)*r, cy+Math.sin(a)*r, 2+3.5*v, 0, 6.283); c.fill();
+  }
+  c.fillStyle = "#707688"; c.font = "9px JetBrains Mono, monospace"; c.textAlign="center";
+  c.fillText("bump", cx, cy+3);
+}
+function drawEq(){
+  const c = eqCv, h = S.eqHist, w=198, hh=60; c.clearRect(0,0,w,hh);
+  if (h.length<2) return;
+  const lo = Math.min(...h, START*0.9), hi = Math.max(...h, START*1.1);
+  const y = v => hh-4 - (v-lo)/(hi-lo)*(hh-8);
+  c.strokeStyle = "#3a3f4d"; c.setLineDash([3,4]); c.beginPath(); c.moveTo(0,y(START)); c.lineTo(w,y(START)); c.stroke(); c.setLineDash([]);
+  const up = h[h.length-1] >= START;
+  const g = c.createLinearGradient(0,0,0,hh); g.addColorStop(0, up?"rgba(204,255,60,.28)":"rgba(255,84,104,.25)"); g.addColorStop(1,"rgba(0,0,0,0)");
+  c.beginPath(); h.forEach((v,i)=>{ const x=i/(h.length-1)*w; i?c.lineTo(x,y(v)):c.moveTo(x,y(v)); });
+  c.lineTo(w,hh); c.lineTo(0,hh); c.closePath(); c.fillStyle=g; c.fill();
+  c.beginPath(); h.forEach((v,i)=>{ const x=i/(h.length-1)*w; i?c.lineTo(x,y(v)):c.moveTo(x,y(v)); });
+  c.strokeStyle = up ? "#ccff3c" : "#ff5468"; c.lineWidth=1.5; c.stroke(); c.lineWidth=1;
+}
+
+
+const rollC = $("rollCv").getContext("2d"), dpC = $("dpCv").getContext("2d"), loadC = $("loadCv").getContext("2d");
+function drawBottom(){
+  // rolling skip line
+  rollC.clearRect(0,0,276,44);
+  const h = S.rollHist;
+  rollC.strokeStyle="#252a36"; rollC.beginPath(); rollC.moveTo(0,22); rollC.lineTo(276,22); rollC.stroke();
+  if (h.length>1){ rollC.beginPath(); h.forEach((v,i)=>{ const x=i/(Math.max(h.length,60)-1)*276, y=42-v*40; i?rollC.lineTo(x,y):rollC.moveTo(x,y); });
+    rollC.strokeStyle="#ff4fa3"; rollC.lineWidth=1.5; rollC.stroke(); rollC.lineWidth=1;
+    const lx=(h.length-1)/(Math.max(h.length,60)-1)*276, ly=42-h[h.length-1]*40; rollC.fillStyle="#fff"; rollC.beginPath(); rollC.arc(lx,ly,2.5,0,6.283); rollC.fill(); }
+  // deployer trade outcomes as ticks
+  dpC.clearRect(0,0,276,40);
+  const d = S.dpHist.slice(-40);
+  d.forEach((v,i)=>{ dpC.fillStyle = v ? "#ccff3c" : "#ff5468"; dpC.fillRect(i*6.9, v?6:22, 5, 12); });
+  if (!d.length){ dpC.fillStyle="#3a3f4d"; dpC.font="9px JetBrains Mono, monospace"; dpC.fillText("each tick is a trade on a known deployer", 0, 22); }
+  // lobe traces
+  const L = [["antennal","#8f84ff"],["optic","#9d7cff"],["mushroom","#ff4fa3"],["central","#6d63d6"],["motor","#ff5468"]];
+  for (const [k] of L){ const t = traces[k]; t.push(Math.min(1, BR.level(k)*1.6)); if (t.length>200) t.shift(); }
+  loadC.clearRect(0,0,276,150);
+  L.forEach(([k,col],j)=>{
+    const y0 = 8 + j*29, t = traces[k];
+    loadC.fillStyle="#707688"; loadC.font="9px JetBrains Mono, monospace"; loadC.fillText(k, 0, y0+8);
+    loadC.fillStyle="#ecebf2"; loadC.textAlign="right"; loadC.fillText(Math.round((t[t.length-1]||0)*100)+"%", 276, y0+8); loadC.textAlign="left";
+    loadC.beginPath(); t.forEach((v,i)=>{ const x = 64 + i/199*176, y = y0+22 - v*20; i?loadC.lineTo(x,y):loadC.moveTo(x,y); });
+    loadC.strokeStyle=col; loadC.lineWidth=1.4; loadC.stroke(); loadC.lineWidth=1;
+  });
+}
+
+function ui(){
+  const e = equity(), up = e >= START;
+  $("sPools").textContent = S.seen.toLocaleString("en-US");
+  const dSkip = S.daySeen[S.day] ? S.daySkip[S.day]/S.daySeen[S.day] : 0;
+  $("sSkip").textContent = Math.round(dSkip*100)+"%";
+  $("sTrades").textContent = S.trades; $("sWins").textContent = S.wins;
+  const nz = noiseNow(); $("sNoise").textContent = nz.toFixed(2);
+  $("sEq").textContent = money(e); $("sEq").style.color = up?"var(--lime)":"var(--red)";
+  const ph = PHASES[S.day-1]; $("phT").textContent = ph[0]; $("phC").textContent = ph[1]; $("phP").textContent = ph[2];
+  $("solHit").textContent = S.solHit;
+  $("rhDep").textContent = S.deps.filter(d=>d.pools).length;
+  $("feed").innerHTML = S.feed.map(p=>`<div><span>${p.name}</span><span>${p.dep.id.slice(0,6)}</span></div>`).join("");
+  $("noiseV").textContent = nz.toFixed(2); $("noiseB").style.width = (nz*100)+"%";
+  $("adaptV").textContent = Math.round((1-(nz-0.28)/0.43)*100)+"%";
+  const cur = S.cur;
+  $("glom").innerHTML = FEATS.map(f=>{ const v = cur? cur.obs[f] : 0; return `<div class="row">${f}<b>${f==="bundle"?(v?"yes":"no"):v.toFixed(2)}</b></div><div class="bar" style="margin:0 0 1px"><i style="width:${v*100}%;background:${f==="bundle"&&v?"var(--red)":"var(--violet)"}"></i></div>`; }).join("");
+  $("kcPat").textContent = S.patterns.toLocaleString("en-US");
+  let hi=0; for (let k=0;k<N_KC;k++) if (S.kcW[k]>0.6) hi++; $("kcHi").textContent = hi;
+  const sh = S.shown;
+  if (sh){
+    $("cxMode").textContent = sh.mode; $("cxMode").style.color = sh.mode==="exploit"?"var(--lime)":(sh.mode==="explore lock"?"var(--red)":"var(--orange)");
+    $("cxScore").textContent = sh.comb.toFixed(2);
+    $("verdict").textContent = sh.verdict; $("verdict").style.color = sh.verdict==="PASS"?"var(--green)":(sh.verdict==="SKIP"?"var(--red)":"var(--orange)");
+    $("moPool").textContent = sh.name;
+  }
+  $("cxEps").textContent = Math.round(S.eps*100)+"%";
+  $("moSkip").textContent = Math.round(dSkip*100)+"%";
+  $("open").innerHTML = S.open.length ? S.open.map(p=>{ const r=p.path[Math.min(p.age,p.life)]; return `<div><span>${p.pool.name}</span><span style="color:${r>=0?"var(--green)":"var(--red)"}">${r>=0?"+":""}${Math.round(r*100)}%</span></div>`; }).join("") : `<div style="color:var(--dim)">flat. waiting for a pass.</div>`;
+  $("youClick").textContent = S.clicks;
+  $("youNext").textContent = Math.max(0, S.nextClick - S.seen) + " pools";
+  $("acct").textContent = money(e); $("acct").style.color = up?"var(--lime)":"var(--red)";
+  $("acctPct").textContent = (up?"+":"")+Math.round((e/START-1)*100)+"%"; $("acctPct").style.color = up?"var(--lime)":"var(--red)";
+  // bottom
+  $("skipDays").innerHTML = Array.from({length:DAYS},(_,i)=>{ const d=i+1, n=S.daySeen[d], r=n? S.daySkip[d]/n : 0;
+    return `<div class="c ${d===S.day?"cur":""}"><em>${n?Math.round(r*100)+"%":""}</em><i style="height:${r*100}%"></i><span>d${d}</span></div>`; }).join("");
+  $("dpBig").textContent = S.depWins+" of "+S.depTrades; $("dpBig").style.color = S.depTrades? "var(--lime)" : "var(--dim)";
+  $("dpBar").style.width = (S.depTrades? S.depWins/S.depTrades*100 : 0)+"%";
+  $("dpOther").textContent = S.othWins+" of "+S.othTrades;
+  $("dpConf").textContent = S.confirmedCount;
+  if (S.feed[0]){ const d0 = S.feed[0].dep; $("dpNow").textContent = d0.id + (d0.conf ? " · known" : " · unknown"); $("dpNow").style.color = d0.conf ? "var(--lime)" : "var(--dim)";
+    $("evNow").textContent = S.feed[0].name + " · " + S.feed[0].verdict.toLowerCase(); $("evNow").style.color = S.feed[0].verdict==="PASS" ? "var(--green)" : (S.feed[0].verdict==="SKIP" ? "var(--dim)" : "var(--orange)"); }
+  $("rollSkip").textContent = S.recent.length ? Math.round(100*S.recent.reduce((a,b)=>a+b,0)/S.recent.length)+"%" : "0%";
+  $("pps").textContent = S.done ? 0 : (rate*spd).toFixed(0);
+  $("spikes").textContent = BR.spikes().toLocaleString("en-US");
+  $("brainStage").textContent = "TERMINAL · " + BR.stage().toUpperCase();
+  $("dpHead").textContent = S.confirmedCount ? "contract reuse" : "not found";
+  $("events").innerHTML = S.events.map(([t,m,c])=>`<div><span style="color:var(--faint)">${t}</span><span style="color:${c};overflow:hidden;text-overflow:ellipsis;max-width:205px">${m}</span></div>`).join("");
+  $("dayOf").textContent = S.day+"/"+DAYS;
+  $("days").innerHTML = PHASES.map((p,i)=>{ const d=i+1; const st = d<S.day || S.done ? "done" : (d===S.day ? "run" : "idle");
+    const col = st==="done" ? "var(--text)" : (st==="run" ? "var(--lime)" : "var(--faint)");
+    const n=S.daySeen[d], r=n? Math.round(100*S.daySkip[d]/n)+"% skip" : "";
+    const prog = st==="done" ? 1 : (st==="run" ? (S.seen - (d-1)*PPD)/PPD : 0);
+    return `<div class="row" style="line-height:16px"><span style="color:${col}">d${d} ${p[0].split("· ")[1].toLowerCase()}</span><b style="color:${col}">${st==="run"?"run":(st==="done"?r:"idle")}${st==="run"?'<span class="dot" style="background:var(--lime)"></span>':""}</b></div><div class="bar" style="margin:1px 0 7px"><i style="width:${prog*100}%;background:${st==="run"?"var(--lime)":"var(--faint)"};transition:none"></i></div>`; }).join("");
+}
+
+// ---------------------------------------------------------------- loop
+let spd = 1, rate = 12, acc = 0, last = performance.now(), showT = 0;
+document.querySelectorAll("#ctrl button[data-sp]").forEach(b=>b.addEventListener("click",()=>{
+  spd = +b.dataset.sp; document.querySelectorAll("#ctrl button[data-sp]").forEach(x=>x.classList.toggle("on", x===b)); }));
+$("rst").addEventListener("click",()=>{ seed = Math.floor(Math.random()*1e6); reset(); });
+
+function frame(now){
+  const dt = Math.min(0.1, (now-last)/1000); last = now;
+  if (!S.done){
+    acc += dt*rate*spd;
+    let latest = null;
+    while (acc >= 1){ acc -= 1; latest = spawn(); tickPositions(); if (S.seen >= PPD*DAYS){ S.done = true; event("run complete. 6 days.", "var(--lime)"); break; } }
+    showT -= dt;
+    if (latest && showT <= 0){ showcase(latest); showT = 1.35; }
+  }
+  // pulses
+  for (let i=pulses.length-1;i>=0;i--){
+    const p = pulses[i], t = (now-p.t0)/p.dur;
+    if (t >= 1){ p.c.remove(); pulses.splice(i,1); continue; }
+    const pt = p.w.el.getPointAtLength(p.w.len*t); p.c.setAttribute("cx",pt.x); p.c.setAttribute("cy",pt.y);
+  }
+  BR.step(); BR.draw(); drawKc(); drawDep(); drawRing(); drawEq(); drawBottom();
+  if (!frame.n || frame.n % 3 === 0) ui();
+  frame.n = (frame.n||0)+1;
+  requestAnimationFrame(frame);
+}
+reset(); drawWires();
+document.fonts && document.fonts.ready.then(drawWires);
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

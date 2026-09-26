@@ -27,3 +27,17 @@ jobs:
           python-version: ${{ matrix.python }}
       - run: pip install -e . pytest
       - run: pytest -q
+
+  site:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python web/build.py --check
+      - name: site size under 25 MB
+        run: |
+          size=$(du -sk web | cut -f1)
+          echo "web is ${size} KB"
+          test "$size" -lt 25600

@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://BEEBRAIN_DOMAIN/sitemap.xml
