@@ -29,6 +29,16 @@ one seed is not a result.
 `--trades` plays back your own closed trades next to the animation. the brain does not learn from them and does not score them.
 the animation still runs on synthetic pools. the header says so.
 
+## the field
+
+- the live features are proxies. pool age stands in for creator history, buys and sell pressure for holders and snipers. none of them is the planted edge of the sim.
+- the bee arrives with an empty memory and a 50% explore rate. its first hours on a chain are mostly noise.
+- paper fills use the quoted price plus a depth based impact and a 1% fee each way. real fills on thin pools can be much worse, and a paper sell always goes through. a real honeypot does not let you out.
+- prices arrive every 15 seconds at best. a rug inside that window shows up late.
+- bonding curve launches without a pool are skipped by a reflex. the bee never trades them.
+- discovery comes from dexscreener's latest profiles and boosts and geckoterminal's newest pools. that is a sample, biased toward tokens someone paid to promote.
+- the forward test is honest but young. under a few hundred pools per verdict, its hit rates are mostly luck.
+
 ## the 3d video
 
 the video uses the engine for the pools, verdicts and scores it shows, from one seed and one window of pools.

@@ -21,7 +21,22 @@ it scores every new pool through five lobes, after the reflexes and before the m
 it answers with a vector, one value per lobe, not one number.
 it learns from closed trades. a print is sugar, a rug is punishment.
 
-everything here runs on synthetic pools and a paper account. no keys, no signatures, no orders.
+the sim runs on synthetic pools. the field runs the same brain on real pools. both trade paper money. this release places no orders.
+
+## race the bee on real pools
+
+<img src="web/assets/brand/field.png" width="100%" alt="the field page: live pools on the left, the bee brain and its senses in the middle, three paper accounts racing on the right">
+
+the field drops the bee on live memecoin pools from solana, base, bsc and robinhood chain. it scores every pool through five lobes. three paper accounts race from $500: you, the bee on autopilot, and a random baseline behind the same reflexes.
+
+every scored pool is checked again 15 minutes later, fees in, so each verdict gets a real hit rate. when PASS beats SKIP over 300 pools and the bee beats random, the graduation gate opens. until then it is paper only.
+
+```
+beebrain trade --chain solana      # the field in the terminal. b buy, s sell, q quit
+beebrain scan --chain base --json  # one pass over the live field, for your own tools
+```
+
+or open `/trade` on the site: nothing to install, the bee keeps learning in your browser. data is read only, from the public dexscreener and geckoterminal apis. how it works: [docs/field.md](docs/field.md).
 
 ## quick start
 
@@ -38,6 +53,8 @@ beebrain sim --seeds 0-9
 | `beebrain terminal --plain --frames 50` | no animation, prints one frame and exits |
 | `beebrain sim --days 9 --seeds 0-9 --json` | headless runs: final account, trades, wins, win rate, max drawdown |
 | `beebrain sim --seeds 5 --vector 120` | the waggle vector of one pool as json |
+| `beebrain trade --chain solana` | the field: live pools, three paper accounts, the forward test |
+| `beebrain scan --chain solana --json` | score the live field once and print every pool |
 | `beebrain render video\|stills\|figures` | the 3d video, point cloud stills and article figures. needs `pip install -e '.[render,figures]'` |
 
 the package and the terminal are stdlib only, python 3.9 and newer.
@@ -127,7 +144,7 @@ paper account from $500, nine days of 40 pools, fees in. `beebrain sim --seeds 0
 - **it is not a connectome.** there is no public whole brain honeybee wiring file to load. the lobes, the sparse code and the reward channel follow published biology, the numbers inside are mine.
 - **its scores are not probabilities.** a mushroom value of 0.81 means the sparse code leans toward past prints. it is uncalibrated.
 - **it can only learn edges that exist.** in both simulations the edge was planted. on a live chain the edge may be weaker, slower or gone.
-- **it does not trade for you.** nerve returns a scored feed. no keys, no signatures, no orders. you click.
+- **it does not trade for you yet.** nerve returns a scored feed and this release places no orders. the field is paper money on real prices.
 
 more in [docs/limitations.md](docs/limitations.md).
 
@@ -138,6 +155,7 @@ more in [docs/limitations.md](docs/limitations.md).
 - router: the central complex sends each pool to jev, grok or the deep analyst, by which one wins on that pool type.
 - opus as sixth lobe: pools in the unsure zone go to opus 5.5, which reads the text the bee cannot.
 - the hive: one bee per chain, solana, robinhood chain and bsc, with separate antennae and a shared mushroom memory.
+- live execution: opt in, small size, only for a bee that opened the graduation gate on paper.
 
 ## the article and the site
 

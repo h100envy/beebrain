@@ -50,6 +50,45 @@ def _sim(a):
     return 0
 
 
+def _trade(a):
+    from .terminal.field import run as run_field
+    return run_field(chain=a.chain, layout=a.layout, fresh=a.fresh, frames=a.frames, plain=a.plain,
+                     width=a.width, height=a.height, save=not a.no_save)
+
+
+def _scan(a):
+    import time
+    from .field.feed import Feed, now_ms
+    from .terminal.field import load_session
+    s = load_session(a.chain)
+    feed = Feed(a.chain)
+    new, _ = feed.poll(time.time(), [])
+    if not new:
+        sys.stderr.write("no pools: %s\n" % feed.status)
+        return 1
+    t = now_ms()
+    s.ingest(new, t)
+    rows = []
+    while s.queue:
+        r = s.score_next(t)
+        if r:
+            rows.append(r)
+    order = {"PASS": 0, "WATCH": 1, "SKIP": 2}
+    rows.sort(key=lambda r: (order[r["verdict"]], -r["comb"]))
+    rows = rows[:a.limit]
+    if a.json:
+        print(json.dumps([{"symbol": r["symbol"], "pair": r["pair"], "url": r["url"], "price": r["price"], "liq": r["liq"],
+                           "verdict": r["verdict"], "score": round(r["comb"], 3), "reflex": r["reasons"],
+                           "waggle": r["vector"]} for r in rows], indent=2))
+        return 0
+    print("beebrain scan · %s · %d pools · read only data · paper brain, not advice" % (a.chain, len(rows)))
+    print("%-12s %-6s %6s %9s  %s" % ("pool", "verdict", "score", "liquidity", "why / link"))
+    for r in rows:
+        why = r["reasons"][0] if r["reasons"] else r["url"]
+        print("%-12s %-6s %6.2f %9s  %s" % (("$" + r["symbol"])[:12], r["verdict"], r["comb"], "${:,.0f}".format(r["liq"]), why))
+    return 0
+
+
 RENDER = {
     "video": ("render/video.py", ["numpy", "scipy", "PIL"]),
     "stills": ("render/stills.py", ["numpy", "scipy", "PIL"]),
@@ -101,6 +140,23 @@ def build_parser():
     s.add_argument("--vector", type=int, default=0, metavar="POOL",
                    help="print the waggle vector of pool number POOL on the first seed")
     s.set_defaults(fn=_sim)
+
+    tr = sub.add_parser("trade", help="paper trade real pools next to the bee, live, in the terminal")
+    tr.add_argument("--chain", default="solana", choices=("solana", "base", "bsc", "robinhood"))
+    tr.add_argument("--layout", choices=("auto", "wide", "compact"), default="auto")
+    tr.add_argument("--fresh", action="store_true", help="start a new bee instead of the saved one")
+    tr.add_argument("--no-save", action="store_true", help="do not read or write ~/.beebrain")
+    tr.add_argument("--frames", type=int, default=0)
+    tr.add_argument("--plain", action="store_true")
+    tr.add_argument("--width", type=int, default=0)
+    tr.add_argument("--height", type=int, default=0)
+    tr.set_defaults(fn=_trade)
+
+    sc = sub.add_parser("scan", help="score the live field once and print it")
+    sc.add_argument("--chain", default="solana", choices=("solana", "base", "bsc", "robinhood"))
+    sc.add_argument("--limit", type=int, default=25)
+    sc.add_argument("--json", action="store_true")
+    sc.set_defaults(fn=_scan)
 
     r = sub.add_parser("render", help="3d video, stills or article figures (optional extras)")
     r.add_argument("what", choices=sorted(RENDER))

@@ -34,6 +34,7 @@
 <header class="bar">
   <a class="mark" href="./">BeeBrain</a>
   <nav aria-label="site">
+    <a href="trade/">field</a>
     <a class="wide-only" href="#how">how it works</a>
     <a class="wide-only" href="#results">results</a>
     <a href="article/">article</a>
@@ -50,9 +51,10 @@
         <h1 class="wordmark">BeeBrain</h1>
         <p class="tagline">inside the hive mind</p>
         <p class="lede">a honeybee brain, simulated, scoring memecoin pools inside <b>nerve</b>. five lobes. one waggle vector. you click.</p>
-        <p class="sim-tag">sim · synthetic pools · paper account · no keys, no orders</p>
+        <p class="sim-tag">sim on synthetic pools · field on real pools · paper accounts · no orders</p>
         <div class="cta">
-          <a class="btn primary" href="https://github.com/h100envy/beebrain">view on github</a>
+          <a class="btn primary" href="trade/">race the bee on live pools</a>
+          <a class="btn" href="https://github.com/h100envy/beebrain">view on github</a>
           <a class="btn" href="article/">read the article</a>
           <a class="btn" href="https://github.com/h100envy/nerve">built on nerve</a>
         </div>
@@ -75,6 +77,23 @@
         <figcaption>one pool at a time through a 72,600 point bee brain. pools, verdicts and scores come from an engine run, seed 5.</figcaption>
       </figure>
     </div>
+  </div>
+</section>
+
+<section id="field">
+  <div class="wrap two">
+    <div>
+      <p class="kicker">the field</p>
+      <h2>race the bee on real pools</h2>
+      <p>the same brain, dropped on live memecoin pools from solana, base, bsc and robinhood chain. it scores each one through five lobes. you trade the same pools with $500 of paper.</p>
+      <p>a random baseline trades beside you both, behind the same reflexes. every pool the bee scores is checked again 15 minutes later, so its verdicts get a real hit rate, fees in.</p>
+      <p>when PASS beats SKIP over 300 pools and the bee beats random, the graduation gate opens. until then it is paper only.</p>
+      <div class="links"><a class="btn primary" href="trade/">open the field</a></div>
+    </div>
+    <figure>
+      <img class="shot" src="assets/brand/field.png" width="1440" height="1000" loading="lazy"
+           alt="the field page: live pools on the left, the bee brain and its senses in the middle, three paper accounts racing on the right">
+    </figure>
   </div>
 </section>
 
@@ -221,7 +240,7 @@
       <li><b>it is not a connectome.</b> there is no public whole brain honeybee wiring file. the architecture follows published biology, the numbers inside are mine.</li>
       <li><b>its scores are not probabilities.</b> a mushroom value of 0.81 leans toward past prints. it is uncalibrated.</li>
       <li><b>it can only learn edges that exist.</b> in both sims the edge was planted. on a live chain it may be weaker, slower or gone.</li>
-      <li><b>it does not trade for you.</b> no keys, no signatures, no orders. you click.</li>
+      <li><b>it does not trade for you yet.</b> this release places no orders. the field is paper money on real prices.</li>
     </ul>
   </div>
 </section>
@@ -236,6 +255,7 @@
       <li><b>routes the models.</b> the central complex sends each pool to jev, grok or the deep analyst, by pool type.</li>
       <li><b>opus 5.5 as a sixth lobe.</b> unsure pools go to opus, which reads the text the bee cannot.</li>
       <li><b>the hive.</b> one bee per chain, separate antennae, a shared mushroom memory.</li>
+      <li><b>live execution.</b> opt in, small size, only for a bee that opened the graduation gate on paper.</li>
     </ul>
   </div>
 </section>
@@ -247,8 +267,9 @@
     <pre><code>git clone https://github.com/h100envy/beebrain
 cd beebrain
 pip install -e .
-beebrain terminal
-beebrain sim --seeds 0-9</code></pre>
+beebrain terminal          # the sim
+beebrain trade             # the field, live pools, paper money
+beebrain scan --json       # one pass over the live field, for your own tools</code></pre>
     <div class="links" style="margin-top:18px">
       <a class="btn primary" href="https://github.com/h100envy/beebrain">github.com/h100envy/beebrain</a>
       <a class="btn" href="https://github.com/h100envy/nerve">nerve protocol</a>
@@ -259,7 +280,7 @@ beebrain sim --seeds 0-9</code></pre>
 </main>
 
 <footer class="foot">
-  <p>beebrain is research and visualisation. synthetic pools, paper account. no keys, no signatures, no orders.</p>
+  <p>beebrain is research. the sim runs on synthetic pools, the field on real pools. both trade paper money. nothing here is financial advice.</p>
   <p>built on <a href="https://github.com/h100envy/nerve">nerve</a> · mit license · <a href="https://github.com/h100envy/beebrain">source</a></p>
 </footer>
 <script>

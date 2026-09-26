@@ -1,4 +1,5 @@
-"""the package must never grow key handling or signing code."""
+"""0.3 is paper only: no key handling or signing code in the package.
+the pull request that adds live execution on purpose removes this test and adds its own checks."""
 import os
 
 PKG = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "beebrain")

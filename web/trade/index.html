@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src https://api.dexscreener.com https://api.geckoterminal.com; base-uri 'none'; form-action 'none'">
+<title>field · BeeBrain · NERVE</title>
+<meta name="description" content="paper trade real memecoin pools next to a simulated honeybee brain. live data, paper money, a forward test.">
+<meta name="theme-color" content="#000000">
+<link rel="canonical" href="https://BEEBRAIN_DOMAIN/trade/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="BeeBrain">
+<meta property="og:title" content="BeeBrain · NERVE">
+<meta property="og:description" content="a honeybee brain, simulated, scoring memecoin pools inside nerve">
+<meta property="og:url" content="https://BEEBRAIN_DOMAIN/trade/">
+<meta property="og:image" content="https://BEEBRAIN_DOMAIN/assets/brand/cover.png">
+<meta property="og:image:alt" content="a honeycomb brain with the BeeBrain wordmark">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="BeeBrain · NERVE">
+<meta name="twitter:description" content="a honeybee brain, simulated, scoring memecoin pools inside nerve">
+<meta name="twitter:image" content="https://BEEBRAIN_DOMAIN/assets/brand/cover.png">
+<link rel="icon" href="../assets/brand/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="../assets/brand/favicon-32.png">
+<link rel="apple-touch-icon" href="../assets/brand/apple-touch-icon.png">
+<link rel="preload" href="../assets/fonts/jetbrainsmono-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../assets/fonts/fonts.css">
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="stylesheet" href="../assets/trade.css">
+</head>
+<body class="trade">
+<a class="skip" href="#main">skip to the field</a>
+<header class="bar">
+  <a class="mark" href="../">BeeBrain</a>
+  <nav aria-label="site">
+    <a href="./" aria-current="page">field</a>
+    <a class="wide-only" href="../#how">how it works</a>
+    <a href="../article/">article</a>
+    <a href="https://github.com/h100envy/beebrain">github</a>
+  </nav>
+</header>
+
+<main id="main" class="deck">
+  <div class="deck-top">
+    <div>
+      <h1 class="deck-title">the field</h1>
+      <p class="deck-sub">real pools, real prices, paper money. the bee scores every pool, you race it.</p>
+    </div>
+    <div class="deck-controls">
+      <div class="seg" role="group" aria-label="chain">
+        <button type="button" data-chain="solana">solana</button>
+        <button type="button" data-chain="base">base</button>
+        <button type="button" data-chain="bsc">bsc</button>
+        <button type="button" data-chain="robinhood">robinhood</button>
+      </div>
+      <p id="status" class="status wait" role="status"><span class="dot" aria-hidden="true"></span><span id="status-text">starting</span></p>
+    </div>
+  </div>
+
+  <div class="deck-grid">
+    <section class="panel col-field" aria-labelledby="h-field">
+      <div class="panel-head"><h2 id="h-field">live pools</h2><span id="queue" class="dim"></span></div>
+      <ul id="field-list" class="field-list"></ul>
+    </section>
+
+    <section class="panel col-focus" aria-labelledby="focus-name">
+      <div class="focus-head">
+        <div>
+          <h2 id="focus-name">waiting for the first pool</h2>
+          <p id="focus-sub" class="dim"></p>
+        </div>
+        <div class="focus-right">
+          <span id="focus-verdict" class="verdict">-</span>
+          <button id="follow" type="button" class="toggle" aria-pressed="true">follow live</button>
+        </div>
+      </div>
+      <p id="focus-why" class="focus-why"></p>
+      <div class="brain-wrap">
+        <canvas id="brain" role="img" aria-label="the bee brain: antennal lobes, optic lobes, mushroom bodies, central complex and motor light up as a pool passes through"></canvas>
+        <span id="stage" class="stage-tag" aria-hidden="true"></span>
+      </div>
+      <div class="two-col">
+        <div>
+          <h3>what the antennae smell</h3>
+          <div id="senses" class="senses"></div>
+        </div>
+        <div>
+          <h3>the waggle vector</h3>
+          <div id="vector" class="vector"></div>
+          <p id="consensus" class="dim"></p>
+          <div class="buy">
+            <span class="dim">paper buy</span>
+            <button type="button" class="btn primary" data-buy="25">$25</button>
+            <button type="button" class="btn primary" data-buy="50">$50</button>
+            <button type="button" class="btn primary" data-buy="100">$100</button>
+            <a id="chart" class="btn" href="#" target="_blank" rel="noopener noreferrer" hidden>chart ↗</a>
+          </div>
+          <p id="buy-note" class="dim" role="status"></p>
+        </div>
+      </div>
+    </section>
+
+    <section class="col-race" aria-label="the race">
+      <div class="panel">
+        <div class="panel-head"><h2>the race</h2><span class="dim">paper, from $500</span></div>
+        <div id="race" class="race"></div>
+        <h3>open positions</h3>
+        <ul id="positions" class="positions"></ul>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h2>forward test</h2><span class="dim">price +15 min, fees in</span></div>
+        <table class="fwd">
+          <thead><tr><th scope="col">verdict</th><th scope="col">pools</th><th scope="col">hit</th><th scope="col">avg net</th></tr></thead>
+          <tbody id="fwd-body"></tbody>
+        </table>
+        <p id="fwd-pending" class="dim"></p>
+      </div>
+      <div id="gate" class="panel gate closed">
+        <div class="panel-head"><h2>graduation</h2><span id="gate-state" class="dim"></span></div>
+        <ul id="gate-list" class="gate-list"></ul>
+        <p class="dim">real money is not wired in. when all three turn green, the bee has earned a look, nothing more.</p>
+        <p id="memory" class="dim"></p>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h2>hive log</h2></div>
+        <ul id="log" class="log"></ul>
+      </div>
+    </section>
+  </div>
+
+  <div class="deck-foot">
+    <p>paper only. prices from dexscreener and geckoterminal, read only, straight from your browser. the bee is uncalibrated and was trained on synthetic pools. nothing here is financial advice.</p>
+    <div class="links">
+      <button id="export" type="button" class="btn">export my trades (csv)</button>
+      <button id="reset" type="button" class="btn">reset this bee</button>
+    </div>
+    <p class="dim">the csv plays back in the terminal: <code>beebrain terminal --trades beebrain-solana-trades.csv</code>. the same field runs in the terminal: <code>beebrain trade</code>.</p>
+  </div>
+</main>
+<script src="bee.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

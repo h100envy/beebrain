@@ -1,5 +1,14 @@
 # changelog
 
+## 0.3.0
+
+- the field: the same brain on live memecoin pools from solana, base, bsc and robinhood chain. read only data from dexscreener and geckoterminal.
+- three paper accounts race from $500: you, the bee on autopilot, a random baseline behind the same reflexes.
+- forward test: every scored pool is priced again after 15 minutes, fees in. hit rate and average net return per verdict.
+- graduation gate: 300 forward tested pools, PASS beats SKIP by 5 points, bee beats random. paper only until then.
+- `/trade` on the site, `beebrain trade` in the terminal, `beebrain scan --json` for your own tools. the browser and python twins are checked against each other.
+- the "never any keys" rule is gone from the docs. 0.3 still places no orders; live execution is on the roadmap behind the gate.
+
 ## 0.2.0
 
 - repo layout: the model, the market, the engine and the terminal are separate modules. `brain.py` imports no ui.
