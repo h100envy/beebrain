@@ -24,7 +24,7 @@
 <style>
 :root{
   --bg:#07080c; --panel:#10121a; --panel2:#151822; --line:#252a36; --wire:#2c3140;
-  --text:#ecebf2; --dim:#707688; --faint:#3a3f4d;
+  --text:#ecebf2; --dim:#9ba0b2; --faint:#7d8294;
   --pink:#ff4fa3; --pinkd:#b0306f; --lime:#ccff3c; --orange:#ffb04a; --violet:#8f84ff;
   --green:#3fe08a; --red:#ff5468; --sol:#9d7cff;
   --mono:"JetBrains Mono",ui-monospace,Menlo,monospace; --sans:"Space Grotesk",system-ui,sans-serif;
@@ -48,7 +48,7 @@ body{ font-family:var(--mono); }
 .st .k{ font-size:9px; color:var(--dim); letter-spacing:1.4px; text-transform:uppercase; }
 .st .v{ font-size:19px; font-weight:700; margin-top:4px; font-variant-numeric:tabular-nums; }
 #ctrl{ display:flex; gap:6px; margin-left:10px; }
-#ctrl button{ font:700 10px var(--mono); letter-spacing:1px; color:var(--dim); background:transparent; border:1px solid var(--line); border-radius:12px; padding:6px 11px; cursor:pointer; }
+#ctrl button{ font:700 10px var(--mono); letter-spacing:1px; color:var(--dim); background:transparent; border:1px solid var(--line); border-radius:14px; padding:8px 12px; min-height:28px; min-width:32px; cursor:pointer; }
 #ctrl button.on{ background:var(--lime); color:#0b0c10; border-color:var(--lime); }
 #ctrl button:focus-visible{ outline:2px solid var(--pink); outline-offset:2px; }
 #simtag{ position:absolute; right:28px; top:66px; font-size:9px; color:var(--faint); letter-spacing:1px; }
@@ -73,7 +73,7 @@ body{ font-family:var(--mono); }
 /* nodes */
 .node{ position:absolute; background:var(--panel); border:1px solid var(--line); border-radius:4px; font-size:10px; transition:box-shadow .35s, border-color .35s; overflow:hidden; }
 .node .h{ display:flex; justify-content:space-between; align-items:center; padding:5px 8px; font-weight:700; font-size:11px; color:#0b0c10; }
-.node .h .tag{ font-size:8px; letter-spacing:1px; opacity:.75; }
+.node .h .tag{ font-size:8px; letter-spacing:1px; }
 .node .b{ padding:6px 8px 7px; }
 .row{ display:flex; justify-content:space-between; gap:8px; line-height:17px; color:var(--dim); white-space:nowrap; }
 .row b{ color:var(--text); font-weight:500; font-variant-numeric:tabular-nums; }

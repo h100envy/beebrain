@@ -200,7 +200,8 @@ ARTICLE_FOOT = """
 </main>
 <footer class="foot">
   <p>beebrain is research and visualisation. synthetic pools, paper account. no keys, no signatures, no orders.</p>
-  <p><a href="https://github.com/h100envy/beebrain">github.com/h100envy/beebrain</a> · built on <a href="https://github.com/h100envy/nerve">nerve</a> · mit license</p>
+  <p><a href="https://github.com/h100envy/beebrain">github.com/h100envy/beebrain</a>
+     · built on <a href="https://github.com/h100envy/nerve">nerve</a> · mit license</p>
 </footer>
 </body>
 </html>
@@ -270,7 +271,7 @@ def main():
         dom = re.sub(r"^https?://", "", a.domain).strip("/")
         for dirpath, _, fnames in os.walk(WEB):
             for f in fnames:
-                if f.endswith((".html", ".xml", ".txt")):
+                if f.endswith((".html", ".xml", ".txt")) and not f.startswith("._"):
                     p = os.path.join(dirpath, f)
                     s = open(p, encoding="utf-8").read()
                     if PLACEHOLDER in s:
@@ -282,7 +283,7 @@ def main():
     for dirpath, _, fnames in os.walk(WEB):
         for f in fnames:
             p = os.path.join(dirpath, f)
-            if f.endswith(".html") and p not in files:
+            if f.endswith(".html") and not f.startswith("._") and p not in files:
                 extra[p] = open(p, encoding="utf-8").read()
     problems = []
     if a.check:
