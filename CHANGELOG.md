@@ -7,6 +7,8 @@
 - forward test: every scored pool is priced again after 15 minutes, fees in. hit rate and average net return per verdict.
 - graduation gate: 300 forward tested pools, PASS beats SKIP by 5 points, bee beats random. paper only until then.
 - `/trade` on the site, `beebrain trade` in the terminal, `beebrain scan --json` for your own tools. the browser and python twins are checked against each other.
+- `beebrain forage` and `beebrain report`: headless field runs and a markdown study of them.
+- the page: price trail since scoring with the 15 minute mark, a live waggle dance, a share card png, a first visit note.
 - the "never any keys" rule is gone from the docs. 0.3 still places no orders; live execution is on the roadmap behind the gate.
 
 ## 0.2.0

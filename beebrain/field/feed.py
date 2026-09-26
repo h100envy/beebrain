@@ -24,6 +24,7 @@ DS_DISCOVER_S = 30.0
 GT_DISCOVER_S = 90.0
 REFRESH_S = 15.0
 BATCH = 30
+DS_LISTS = ("/token-profiles/latest/v1", "/token-boosts/latest/v1", "/token-boosts/top/v1")
 UA = "beebrain-field/0.3 (+https://github.com/h100envy/beebrain)"
 
 
@@ -53,6 +54,7 @@ class Feed:
         self.gecko = gecko and chain in GT_NETWORK
         self.next = {"ds": 0.0, "gt": 0.0, "px": 0.0}
         self.gt_wait = GT_DISCOVER_S
+        self.gt_turn = 0
         self.errors = 0
         self.calls = 0
         self.status = "starting"
@@ -63,7 +65,7 @@ class Feed:
 
     def discover_ds(self):
         tokens = []
-        for path in ("/token-profiles/latest/v1", "/token-boosts/latest/v1"):
+        for path in DS_LISTS:
             for t in self._get(DS + path) or []:
                 if t.get("chainId") == self.chain and t.get("tokenAddress") not in tokens:
                     tokens.append(t.get("tokenAddress"))
@@ -80,7 +82,10 @@ class Feed:
         return list(best.values())
 
     def discover_gt(self):
-        d = self._get("%s/networks/%s/new_pools?page=1&include=base_token" % (GT, GT_NETWORK[self.chain]))
+        # alternate the newest pools and the pools trending over the last 5 minutes
+        kind = "new_pools?page=1&" if self.gt_turn % 2 == 0 else "trending_pools?duration=5m&"
+        self.gt_turn += 1
+        d = self._get("%s/networks/%s/%sinclude=base_token" % (GT, GT_NETWORK[self.chain], kind))
         toks = {t["id"]: t.get("attributes", {}) for t in d.get("included", [])}
         return [norm_gecko(p, self.chain, toks) for p in d.get("data", [])]
 

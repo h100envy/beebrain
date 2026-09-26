@@ -193,7 +193,7 @@ def fixture_fetch(url):
         raise RateLimited(url)
     if "token-profiles" in url:
         return json.load(open(os.path.join(FIX, "ds_profiles.json")))
-    if "token-boosts" in url:
+    if "token-boosts" in url:  # latest and top
         return []
     if "/tokens/v1/" in url:
         return json.load(open(os.path.join(FIX, "ds_tokens_solana.json")))
@@ -222,3 +222,22 @@ def test_feed_backs_off_gecko_on_429():
     f = Feed("solana", fetch=fixture_fetch)
     new, _ = f.poll(0.0, [])
     assert new and f.status == "live" and f.gt_wait == 2 * GT_DISCOVER_S
+
+
+def test_report_from_a_session():
+    from beebrain.field.report import report, snapshot, spearman
+
+    class F:
+        calls, errors, status = 3, 0, "live"
+    s = FieldSession()
+    for i in range(12):
+        s.ingest([snap(pair="P%d" % i, symbol="B%d" % i, buys_h1=50 + 40 * i, chg_m5=-70.0 if i % 4 == 0 else 3.0)], NOW)
+        s.score_next(NOW)
+    for i in range(12):
+        s.ingest([snap(pair="P%d" % i, price=1.0 + 0.05 * i, t_ms=NOW + 16 * 60e3)], NOW + 16 * 60e3)
+    s.mark(NOW + 16 * 60e3)
+    d = json.loads(json.dumps(snapshot(s, NOW, F())))
+    md = report(d)
+    assert "## forward test" in md and "killed by a reflex" in md and "bee score" in md
+    assert len(d["log"]) == 12
+    assert spearman([1, 2, 3, 4, 5, 6, 7, 8], [2, 4, 6, 8, 10, 12, 14, 16]) == pytest.approx(1.0)

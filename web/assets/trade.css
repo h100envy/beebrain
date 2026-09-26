@@ -75,6 +75,19 @@
 .buy .btn { padding: 9px 14px; min-height: 40px; }
 .btn:disabled { opacity: .35; cursor: not-allowed; }
 
+.intro { display: flex; gap: 14px; align-items: flex-start; border: 1px solid var(--pink); border-radius: 10px; padding: 12px 16px; margin: 0 0 14px; background: #12060d; }
+.intro p { margin: 0; font-size: 14px; }
+.intro[hidden] { display: none; }
+.trail-wrap { margin: 4px 0 6px; }
+.trail-head { display: flex; justify-content: space-between; font-size: 12px; }
+.trail { width: 100%; height: 70px; display: block; }
+.trail .line { fill: none; stroke: var(--pink-soft); stroke-width: 1.6; vector-effect: non-scaling-stroke; }
+.trail .base { stroke: var(--line); stroke-dasharray: 3 3; vector-effect: non-scaling-stroke; }
+.trail .due { stroke: var(--amber); stroke-dasharray: 2 3; vector-effect: non-scaling-stroke; }
+.dance-row { display: grid; grid-template-columns: 120px 1fr; gap: 12px; align-items: center; margin-bottom: 6px; }
+.dance-row p { margin: 0; font-size: 12px; }
+#dance { width: 120px; height: 120px; }
+
 /* race */
 .race { display: grid; gap: 10px; }
 .acct { border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; background: #09080c; }

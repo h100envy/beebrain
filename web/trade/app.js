@@ -37,6 +37,16 @@
   let chain = store.get("beebrain.field.chain");
   if (!CHAINS.includes(chain)) chain = "solana";
   let S, feed, selected = null, follow = true, polling = false, resetArmed = 0;
+  const trails = new Map();          // pair -> [[t, price]], this visit only
+  function note(snaps, now) {
+    for (const s of snaps) {
+      if (!(s.price > 0)) continue;
+      const tr = trails.get(s.pair) || [];
+      if (!tr.length || now - tr[tr.length - 1][0] > 4000) tr.push([now, s.price]);
+      if (tr.length > 400) tr.shift();
+      trails.set(s.pair, tr);
+    }
+  }
   const T = { score: 0, mark: 0, poll: 0, save: 0, ui: 0 };
 
   function load(c) {
@@ -63,7 +73,7 @@
       if (selected && !track.includes(selected.pair)) track.push(selected.pair);
       const { found, fresh } = await feed.poll(Date.now() / 1000, track);
       const now = Date.now();
-      S.ingest(found, now); S.ingest(fresh, now);
+      S.ingest(found, now); S.ingest(fresh, now); note(fresh, now); note(found, now);
     } finally { polling = false; }
   }
 
@@ -83,7 +93,26 @@
 
   // -------------------------------------------------------------- render
   function renderAll() {
-    renderStatus(); renderField(); renderFocus(); renderRace(); renderForward(); renderLog();
+    renderStatus(); renderField(); renderFocus(); renderTrail(); renderRace(); renderForward(); renderLog();
+  }
+
+  function renderTrail() {
+    const svg = $("trail"), mv = $("trail-move");
+    svg.replaceChildren(); mv.textContent = "";
+    const r = selected; if (!r) return;
+    const pts = [[r.t, r.price]].concat((trails.get(r.pair) || []).filter((p) => p[0] > r.t));
+    const due = r.t + C.HORIZON_MIN * 60000, tEnd = Math.max(due, pts[pts.length - 1][0]);
+    const ys = pts.map((p) => p[1]).concat([r.price]), lo = Math.min(...ys), hi = Math.max(...ys), span = hi - lo || hi * 0.01 || 1;
+    const X = (t) => ((t - r.t) / (tEnd - r.t)) * 400, Y = (p) => 64 - ((p - lo) / span) * 58;
+    const ns = "http://www.w3.org/2000/svg", mk = (tag, cls, attrs) => {
+      const e = document.createElementNS(ns, tag); e.setAttribute("class", cls);
+      for (const k in attrs) e.setAttribute(k, attrs[k]); svg.append(e); return e; };
+    mk("line", "base", { x1: 0, x2: 400, y1: Y(r.price), y2: Y(r.price) });
+    mk("line", "due", { x1: X(due), x2: X(due), y1: 0, y2: 70 });
+    if (pts.length > 1) mk("path", "line", { d: pts.map((p, i) => (i ? "L" : "M") + X(p[0]).toFixed(1) + "," + Y(p[1]).toFixed(1)).join(" ") });
+    const last = pts[pts.length - 1][1], m = last / r.price - 1, mins = (pts[pts.length - 1][0] - r.t) / 60000;
+    mv.textContent = pts.length > 1 ? B.pct(m, 1) + " in " + mins.toFixed(0) + " min" + (mins >= C.HORIZON_MIN ? " · verdict checked" : "") : "watching";
+    mv.className = "num " + (m >= 0 ? "up" : "down");
   }
 
   function renderStatus() {
@@ -318,6 +347,71 @@
     return { fire };
   })();
 
+  // --------------------------------------------------------------- dance
+  (function dance() {
+    const cv = $("dance"), ctx = cv.getContext("2d"), d = Math.min(2, window.devicePixelRatio || 1);
+    cv.width = 120 * d; cv.height = 120 * d; ctx.setTransform(d, 0, 0, d, 0, 0);
+    let t = 0;
+    const trail = [];
+    // same figure eight as the terminal: straight run down the middle, return loops on alternate sides
+    function xy(t, comb, cons) {
+      const s = t % (2 * Math.PI), run = 0.35 + 0.65 * B.clamp((comb - 0.3) / 0.5), rp = Math.PI * 0.8;
+      if (s < rp) { const u = s / rp; return [0.22 * (1.1 - cons) * Math.sin(u * 26), run * (1 - 2 * u)]; }
+      const u = (s - rp) / (2 * Math.PI - rp), side = Math.floor(t / (2 * Math.PI)) % 2 ? -1 : 1;
+      return [side * 0.9 * Math.sin(Math.PI * u), -run + 2 * run * u];
+    }
+    function frame() {
+      const r = selected, comb = r ? r.comb : 0.5, cons = r ? r.vector.consensus : 0.5;
+      t += reduce ? 0 : 0.05;
+      const p = xy(t, comb, cons);
+      trail.push([60 + p[0] * 50, 60 - p[1] * 50]); if (trail.length > 70) trail.shift();
+      ctx.clearRect(0, 0, 120, 120);
+      ctx.fillStyle = "rgba(176,48,111,.35)";
+      for (let k = 0; k < 160; k++) { const q = xy(Math.floor(t / (4 * Math.PI)) * 4 * Math.PI + k / 160 * 4 * Math.PI, comb, cons); ctx.fillRect(60 + q[0] * 50, 60 - q[1] * 50, 1.2, 1.2); }
+      trail.forEach(([x, y], i) => { ctx.fillStyle = "rgba(255,175,215," + (i / trail.length).toFixed(2) + ")"; ctx.beginPath(); ctx.arc(x, y, 1 + 2 * i / trail.length, 0, 7); ctx.fill(); });
+      const [hx, hy] = trail[trail.length - 1];
+      ctx.fillStyle = "#f3efe6"; ctx.beginPath(); ctx.arc(hx, hy, 3.5, 0, 7); ctx.fill();
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  })();
+
+  // --------------------------------------------------------------- share
+  function shareCard() {
+    const W = 1200, H = 630, cv = document.createElement("canvas"); cv.width = W; cv.height = H;
+    const c = cv.getContext("2d");
+    c.fillStyle = "#000"; c.fillRect(0, 0, W, H);
+    const g = c.createRadialGradient(980, 150, 20, 980, 150, 520); g.addColorStop(0, "rgba(255,79,163,.22)"); g.addColorStop(1, "rgba(255,79,163,0)");
+    c.fillStyle = g; c.fillRect(0, 0, W, H);
+    const grad = c.createLinearGradient(60, 0, 520, 0); grad.addColorStop(0, "#f3efe6"); grad.addColorStop(0.7, "#ffafd7"); grad.addColorStop(1, "#ff4fa3");
+    c.fillStyle = grad; c.font = "700 72px Cinzel, serif"; c.fillText("BeeBrain", 60, 120);
+    c.fillStyle = "#a09caa"; c.font = "22px 'JetBrains Mono', monospace";
+    const mins = Math.max(1, (Date.now() - S.started) / 60000);
+    c.fillText("the field · " + S.chain + " · " + S.scored + " live pools · " + (mins < 120 ? mins.toFixed(0) + " min" : (mins / 60).toFixed(1) + " h"), 62, 165);
+    const rows = [["the bee", S.accounts.bee, "#ff4fa3"], ["random baseline", S.accounts.random, "#a09caa"], ["me", S.accounts.you, "#ffb04a"]];
+    rows.forEach(([name, a, col], i) => {
+      const y = 260 + i * 92, e = a.equity, m = e / a.start - 1;
+      c.fillStyle = col; c.font = "700 26px 'Space Grotesk', sans-serif"; c.fillText(name, 62, y);
+      c.fillStyle = "#f3efe6"; c.font = "700 54px 'Space Grotesk', sans-serif"; c.fillText(money(e), 330, y + 8);
+      c.fillStyle = m >= 0 ? "#3fe08a" : "#ff6b7e"; c.font = "700 30px 'JetBrains Mono', monospace"; c.fillText(B.pct(m, 1), 620, y + 4);
+    });
+    const fw = S.forward();
+    c.fillStyle = "#f3efe6"; c.font = "700 26px 'Space Grotesk', sans-serif"; c.fillText("forward test, +15 min", 820, 250);
+    c.font = "24px 'JetBrains Mono', monospace";
+    ["PASS", "WATCH", "SKIP"].forEach((v, i) => {
+      const f = fw[v], y = 300 + i * 46;
+      c.fillStyle = v === "PASS" ? "#3fe08a" : v === "WATCH" ? "#ffb04a" : "#ff6b7e"; c.fillText(v.toLowerCase(), 820, y);
+      c.fillStyle = "#dcd8cf"; c.fillText(f.n ? f.n + " · " + B.pct(f.avg_net, 1) : "waiting", 950, y);
+    });
+    c.fillStyle = "#6f6b78"; c.font = "18px 'JetBrains Mono', monospace";
+    c.fillText("paper money on real prices. not financial advice.", 62, 585);
+    c.fillText("github.com/h100envy/beebrain", 820, 585);
+    cv.toBlob((blob) => {
+      const a = el("a"); a.href = URL.createObjectURL(blob); a.download = "beebrain-race-" + S.chain + ".png";
+      document.body.append(a); a.click(); a.remove();
+    });
+  }
+
   // ------------------------------------------------------------- actions
   function buy(usdAmt) {
     if (!selected) return;
@@ -343,6 +437,9 @@
     for (const b of document.querySelectorAll("[data-buy]")) b.addEventListener("click", () => buy(Number(b.dataset.buy)));
     $("follow").addEventListener("click", () => { follow = !follow; if (follow && S.last) selected = S.last; renderAll(); });
     $("export").addEventListener("click", exportCsv);
+    $("share").addEventListener("click", shareCard);
+    if (!store.get("beebrain.field.intro")) $("intro").hidden = false;
+    $("intro-close").addEventListener("click", () => { $("intro").hidden = true; store.set("beebrain.field.intro", "1"); });
     $("reset").addEventListener("click", () => {
       const now = Date.now();
       if (now - resetArmed > 4000) { resetArmed = now; $("reset").textContent = "click again to reset"; return; }

@@ -50,6 +50,7 @@ class FieldSession:
         self.fwd = {v: {"n": 0, "wins": 0, "net": 0.0} for v in ("PASS", "WATCH", "SKIP")}
         self.fwd_recent = deque(maxlen=200)
         self.fwd_dropped = 0
+        self.fwd_log = []                # every resolved forward test, for reports
         self.counts = {"PASS": 0, "WATCH": 0, "SKIP": 0}
         self.scored = 0
         self.bee_takes = 0
@@ -139,7 +140,8 @@ class FieldSession:
         if reasons and self.rrand.random() < 0.3:
             self.say(now_ms, "%s reflex: %s" % (pool.name, reasons[0]), "dim")
         self.shadows.append({"pair": s["pair"], "symbol": s["symbol"], "t0": now_ms, "p0": s["price"],
-                             "due": now_ms + self.horizon_min * 60000, "verdict": v, "act": rec["act"], "took": took})
+                             "due": now_ms + self.horizon_min * 60000, "verdict": v, "act": rec["act"], "took": took,
+                             "comb": t["comb"], "obs": obs, "noise": noise, "reasons": reasons, "liq": s["liq"]})
         rec["took"] = took
         self.recent.append(rec)
         self.last = rec
@@ -179,6 +181,9 @@ class FieldSession:
         f["wins"] += 1 if won else 0
         f["net"] += net
         self.fwd_recent.append((sh["symbol"], sh["verdict"], net))
+        if len(self.fwd_log) < 20000:
+            self.fwd_log.append({k: sh.get(k) for k in ("symbol", "pair", "verdict", "comb", "obs", "noise", "reasons", "liq", "took", "t0")}
+                                | {"net": net, "ret": ret})
         if not sh["took"]:
             act = frozenset(sh["act"])
             self.brain.learn(act, won, GHOST_LR)

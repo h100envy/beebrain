@@ -56,6 +56,12 @@
     </div>
   </div>
 
+  <aside id="intro" class="intro" hidden>
+    <p><b>how this works.</b> the bee reads every new pool and says pass, watch or skip. you get $500 of paper to trade the same pools.
+    a random baseline trades too. 15 minutes after each verdict the page checks the real price, so you see whether the bee was right.</p>
+    <button id="intro-close" type="button" class="mini">got it</button>
+  </aside>
+
   <div class="deck-grid">
     <section class="panel col-field" aria-labelledby="h-field">
       <div class="panel-head"><h2 id="h-field">live pools</h2><span id="queue" class="dim"></span></div>
@@ -78,6 +84,10 @@
         <canvas id="brain" role="img" aria-label="the bee brain: antennal lobes, optic lobes, mushroom bodies, central complex and motor light up as a pool passes through"></canvas>
         <span id="stage" class="stage-tag" aria-hidden="true"></span>
       </div>
+      <div class="trail-wrap">
+        <div class="trail-head"><span class="dim">price since the bee scored it</span><span id="trail-move" class="num"></span></div>
+        <svg id="trail" class="trail" viewBox="0 0 400 70" preserveAspectRatio="none" aria-hidden="true"></svg>
+      </div>
       <div class="two-col">
         <div>
           <h3>what the antennae smell</h3>
@@ -85,6 +95,10 @@
         </div>
         <div>
           <h3>the waggle vector</h3>
+          <div class="dance-row">
+            <canvas id="dance" width="120" height="120" role="img" aria-label="the waggle dance: run length is the score, wiggle width is the dissent between lobes"></canvas>
+            <p class="dim">run length is the score. wiggle width is how much the lobes disagree.</p>
+          </div>
           <div id="vector" class="vector"></div>
           <p id="consensus" class="dim"></p>
           <div class="buy">
@@ -130,6 +144,7 @@
   <div class="deck-foot">
     <p>paper only. prices from dexscreener and geckoterminal, read only, straight from your browser. the bee is uncalibrated and was trained on synthetic pools. nothing here is financial advice.</p>
     <div class="links">
+      <button id="share" type="button" class="btn primary">share my race (png)</button>
       <button id="export" type="button" class="btn">export my trades (csv)</button>
       <button id="reset" type="button" class="btn">reset this bee</button>
     </div>

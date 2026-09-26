@@ -89,6 +89,20 @@ def _scan(a):
     return 0
 
 
+def _forage(a):
+    from .field.report import forage
+    forage(a.chain, a.minutes, a.out, a.horizon)
+    print("wrote", a.out, "· beebrain report", a.out)
+    return 0
+
+
+def _report(a):
+    from .field.report import report
+    with open(a.path) as fh:
+        print(report(json.load(fh)), end="")
+    return 0
+
+
 RENDER = {
     "video": ("render/video.py", ["numpy", "scipy", "PIL"]),
     "stills": ("render/stills.py", ["numpy", "scipy", "PIL"]),
@@ -157,6 +171,17 @@ def build_parser():
     sc.add_argument("--limit", type=int, default=25)
     sc.add_argument("--json", action="store_true")
     sc.set_defaults(fn=_scan)
+
+    fo = sub.add_parser("forage", help="run the field headless for a while and save a report")
+    fo.add_argument("--chain", default="solana", choices=("solana", "base", "bsc", "robinhood"))
+    fo.add_argument("--minutes", type=float, default=60)
+    fo.add_argument("--horizon", type=float, default=None, help="forward test minutes, default 15")
+    fo.add_argument("--out", default="field.json")
+    fo.set_defaults(fn=_forage)
+
+    rp = sub.add_parser("report", help="markdown summary of a forage run")
+    rp.add_argument("path")
+    rp.set_defaults(fn=_report)
 
     r = sub.add_parser("render", help="3d video, stills or article figures (optional extras)")
     r.add_argument("what", choices=sorted(RENDER))

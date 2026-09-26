@@ -10,6 +10,7 @@ field mode drops the same brain on live memecoin pools and trades paper money ne
 | the site | `/trade`, nothing to install. the bee lives in your browser's storage and keeps learning between visits |
 | the terminal | `beebrain trade --chain solana`. keys: `b` buy the last pass with $50, `s` sell your oldest, `q` quit. saved to `~/.beebrain/` |
 | your own tools | `beebrain scan --chain solana --json`: one pass over the live field, every pool with its verdict, reflexes and waggle vector |
+| a study | `beebrain forage --chain solana --minutes 60 --out f.json`, then `beebrain report f.json`: forward test per verdict, what the reflexes caught, the race, and the rank correlation of each sense with the 15 minute outcome |
 
 the browser and the terminal run the same code twice: `web/trade/bee.js` and `beebrain/field/`. the same wiring
 (mulberry32, seed 5), the same constants, the same senses. `tests/test_field.py` feeds both the same real pools
@@ -21,9 +22,9 @@ read only, public, no keys.
 
 | source | what | how often |
 | --- | --- | --- |
-| dexscreener `token-profiles/latest`, `token-boosts/latest` | discovery | every 30 s |
+| dexscreener `token-profiles/latest`, `token-boosts/latest`, `token-boosts/top` | discovery | every 30 s |
 | dexscreener `tokens/v1/{chain}` | the best pool for each discovered token | with discovery |
-| geckoterminal `networks/{net}/new_pools` | the newest pools | every 90 s, doubles on 429, up to 10 min |
+| geckoterminal `networks/{net}/new_pools` and `trending_pools?duration=5m`, in turn | the newest and the hottest pools | every 90 s, doubles on 429, up to 10 min |
 | dexscreener `latest/dex/pairs/{chain}` | prices for open positions and forward tests, 30 pairs a call | every 15 s |
 
 chains: solana, base, bsc, robinhood chain (dexscreener only). pools older than 30 days or above $200m fdv are left out,

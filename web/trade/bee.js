@@ -450,12 +450,12 @@
         if (!r.ok) throw new Error("http " + r.status);
         return r.json();
       });
-      this.next = { ds: 0, gt: 0, px: 0 }; this.gtWait = 90; this.calls = 0; this.errors = 0; this.status = "starting";
+      this.next = { ds: 0, gt: 0, px: 0 }; this.gtWait = 90; this.gtTurn = 0; this.calls = 0; this.errors = 0; this.status = "starting";
     }
     async get(u) { this.calls++; return this.fetchJson(u); }
     async discoverDs() {
       const tokens = [];
-      for (const path of ["/token-profiles/latest/v1", "/token-boosts/latest/v1"]) {
+      for (const path of ["/token-profiles/latest/v1", "/token-boosts/latest/v1", "/token-boosts/top/v1"]) {
         const list = await this.get(DS + path);
         for (const t of list || []) if (t.chainId === this.chain && !tokens.includes(t.tokenAddress)) tokens.push(t.tokenAddress);
       }
@@ -467,7 +467,8 @@
       return Array.from(best.values());
     }
     async discoverGt() {
-      const d = await this.get(GT + "/networks/" + GT_NETWORK[this.chain] + "/new_pools?page=1&include=base_token");
+      const kind = this.gtTurn++ % 2 === 0 ? "new_pools?page=1&" : "trending_pools?duration=5m&";
+      const d = await this.get(GT + "/networks/" + GT_NETWORK[this.chain] + "/" + kind + "include=base_token");
       const toks = {}; for (const t of d.included || []) toks[t.id] = t.attributes || {};
       return (d.data || []).map((p) => normGecko(p, this.chain, toks));
     }
