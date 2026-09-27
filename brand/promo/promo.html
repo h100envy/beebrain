@@ -1,0 +1,276 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+@font-face{font-family:'Cinzel';font-weight:400 900;src:url('../../web/assets/fonts/cinzel-latin.woff2') format('woff2')}
+@font-face{font-family:'Space Grotesk';font-weight:300 700;src:url('../../web/assets/fonts/spacegrotesk-latin.woff2') format('woff2')}
+@font-face{font-family:'JetBrains Mono';font-weight:100 800;src:url('../../web/assets/fonts/jetbrainsmono-latin.woff2') format('woff2')}
+*{margin:0;padding:0}body{background:#000}canvas{display:block}
+</style></head>
+<body><canvas id="cv" width="1080" height="1350"></canvas>
+<script>
+/*
+ promo for x, 1080x1350, 26 s. a pink bee mascot explains beebrain.
+ every figure shown comes from docs/field-reports/2026-09-26-solana.md.
+ pool names are made up from the sim's syllables, not real tokens.
+*/
+const cv = document.getElementById("cv"), c = cv.getContext("2d");
+const W = 1080, H = 1350, DUR = 26;
+const PINK = "#ff4fa3", SOFT = "#ffafd7", AMBER = "#ffb04a", BONE = "#f3efe6", PLUM = "#3a0f2a", DIM = "#a09caa";
+const GREEN = "#3fe08a", RED = "#ff6b7e", VIOLET = "#9d7cff";
+const LOBES = [["antennal", "#8f84ff"], ["optic", "#9d7cff"], ["mushroom", "#ff4fa3"], ["central", "#c4a8ff"], ["motor", "#ffb04a"]];
+
+// ---------------------------------------------------------------- helpers
+const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
+const ease = (u) => { u = clamp(u); return u * u * (3 - 2 * u); };
+const back = (u) => { u = clamp(u); const s = 1.7; return 1 + (s + 1) * Math.pow(u - 1, 3) + s * Math.pow(u - 1, 2); };
+const win = (t, a, b, fade = 0.35) => ease((t - a) / fade) * (1 - ease((t - (b - fade)) / fade));
+function rng(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+function rr(x, y, w, h, r) { c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); }
+function text(s, x, y, font, col, align = "center", alpha = 1) { c.globalAlpha = alpha; c.font = font; c.fillStyle = col; c.textAlign = align; c.textBaseline = "alphabetic"; c.fillText(s, x, y); c.globalAlpha = 1; }
+// a caption where some words are pink: parts = [["text", color], ...]
+function rich(parts, x, y, size, alpha = 1) {
+  c.font = "700 " + size + "px 'Space Grotesk'"; c.textAlign = "left";
+  const wsum = parts.reduce((a, p) => a + c.measureText(p[0]).width, 0);
+  let cx = x - wsum / 2; c.globalAlpha = alpha;
+  for (const [s, col] of parts) { c.fillStyle = col; c.fillText(s, cx, y); cx += c.measureText(s).width; }
+  c.globalAlpha = 1;
+}
+
+// ------------------------------------------------------------- background
+const R = rng(7), STARS = Array.from({ length: 170 }, () => [R() * W, R() * H, R() < 0.12 ? 2.4 : 1.1, R() < 0.3]);
+function bg(t) {
+  c.fillStyle = "#000"; c.fillRect(0, 0, W, H);
+  const g = c.createRadialGradient(W / 2, H * 0.42, 40, W / 2, H * 0.42, 760);
+  g.addColorStop(0, "rgba(255,79,163,.20)"); g.addColorStop(1, "rgba(255,79,163,0)");
+  c.fillStyle = g; c.fillRect(0, 0, W, H);
+  for (const [x, y, s, pink] of STARS) {
+    const yy = (y + t * 14 * s) % H;
+    c.globalAlpha = 0.35 + 0.35 * Math.sin(t * 2 + x);
+    c.fillStyle = pink ? PINK : "#ecebf2"; c.beginPath(); c.arc(x, yy, s, 0, 7); c.fill();
+  }
+  c.globalAlpha = 1;
+}
+
+// ---------------------------------------------------------------- the bee
+// mood: 1 happy, 0 neutral, -1 unhappy. look: -1..1 pupils left/right
+function bee(x, y, s, t, o = {}) {
+  const mood = o.mood ?? 1, look = o.look ?? 0, flap = o.flap ?? 1, wave = o.wave ?? 0;
+  c.save(); c.translate(x, y); c.scale(s, s);
+  // glow
+  const g = c.createRadialGradient(0, 0, 10, 0, 0, 230); g.addColorStop(0, "rgba(255,79,163,.35)"); g.addColorStop(1, "rgba(255,79,163,0)");
+  c.fillStyle = g; c.fillRect(-240, -240, 480, 480);
+  // wings, behind the body
+  const a = Math.sin(t * 42 * flap) * 0.55;
+  for (const side of [-1, 1]) {
+    c.save(); c.translate(-18 + side * 10, -58); c.rotate(side * (0.35 + a * (side > 0 ? 1 : -1)) - 0.2);
+    c.fillStyle = "rgba(220,235,255,.28)"; c.strokeStyle = "rgba(255,255,255,.75)"; c.lineWidth = 3;
+    c.beginPath(); c.ellipse(side * 18, -52, 38, 70, side * 0.35, 0, 7); c.fill(); c.stroke();
+    c.strokeStyle = "rgba(255,255,255,.35)"; c.lineWidth = 2; c.beginPath(); c.moveTo(0, 0); c.lineTo(side * 26, -96); c.stroke();
+    c.restore();
+  }
+  // stinger
+  c.fillStyle = PLUM; c.beginPath(); c.moveTo(-122, 6); c.lineTo(-150, 14); c.lineTo(-120, 26); c.closePath(); c.fill();
+  // body with stripes
+  c.save(); c.beginPath(); c.ellipse(-40, 12, 92, 70, 0, 0, 7); c.clip();
+  c.fillStyle = SOFT; c.fillRect(-140, -70, 200, 160);
+  for (const [sx, col] of [[-108, PLUM], [-70, PINK], [-32, PLUM], [6, PINK]]) { c.fillStyle = col; c.fillRect(sx, -70, 20, 160); }
+  const shade = c.createLinearGradient(0, -60, 0, 85); shade.addColorStop(0, "rgba(255,255,255,.35)"); shade.addColorStop(0.5, "rgba(255,255,255,0)"); shade.addColorStop(1, "rgba(58,15,42,.45)");
+  c.fillStyle = shade; c.fillRect(-140, -70, 200, 160);
+  c.restore();
+  c.strokeStyle = "rgba(255,175,215,.9)"; c.lineWidth = 3; c.beginPath(); c.ellipse(-40, 12, 92, 70, 0, 0, 7); c.stroke();
+  // little legs
+  c.strokeStyle = PLUM; c.lineWidth = 6; c.lineCap = "round";
+  for (const lx of [-70, -38, -6]) { c.beginPath(); c.moveTo(lx, 74); c.lineTo(lx - 6 + Math.sin(t * 6 + lx) * 3, 96); c.stroke(); }
+  // happy sparkles around the head
+  if (wave > 0) {
+    for (let k = 0; k < 5; k++) {
+      const an = t * 1.6 + k * 1.2566, rad = 120 + 10 * Math.sin(t * 3 + k);
+      const sx = 70 + Math.cos(an) * rad, sy = -30 + Math.sin(an) * rad * 0.8, sz = 7 + 4 * Math.sin(t * 5 + k);
+      c.save(); c.translate(sx, sy); c.rotate(t * 2 + k); c.fillStyle = k % 2 ? AMBER : SOFT; c.globalAlpha = 0.9 * wave;
+      c.beginPath(); for (let q = 0; q < 8; q++) { const r = q % 2 ? sz * 0.4 : sz; c[q ? "lineTo" : "moveTo"](r * Math.cos(q * Math.PI / 4), r * Math.sin(q * Math.PI / 4)); }
+      c.closePath(); c.fill(); c.restore();
+    }
+  }
+  // head
+  c.save(); c.translate(70, -16);
+  // antennae
+  for (const side of [-1, 1]) {
+    const wig = Math.sin(t * 4 + side) * 6;
+    c.strokeStyle = BONE; c.lineWidth = 6; c.beginPath(); c.moveTo(side * 16, -52);
+    c.quadraticCurveTo(side * 30 + wig, -110, side * 52 + wig, -126); c.stroke();
+    c.save(); c.shadowColor = AMBER; c.shadowBlur = 24; c.fillStyle = AMBER; c.beginPath(); c.arc(side * 52 + wig, -126, 12, 0, 7); c.fill(); c.restore();
+  }
+  c.fillStyle = "#ffc9e3"; c.beginPath(); c.arc(0, 0, 62, 0, 7); c.fill();
+  c.strokeStyle = "rgba(255,79,163,.9)"; c.lineWidth = 3; c.stroke();
+  // honeycomb brain on the forehead
+  c.save(); c.beginPath(); c.arc(0, 0, 62, 0, 7); c.clip();
+  const hr = 7.5, pulse = 0.5 + 0.5 * Math.sin(t * 5);
+  for (let row = 0; row < 3; row++) for (let col = -3; col <= 3; col++) {
+    const hx = col * hr * 1.75 + (row % 2) * hr * 0.87, hy = -46 + row * hr * 1.5;
+    c.beginPath(); for (let k = 0; k < 6; k++) { const an = Math.PI / 3 * k + Math.PI / 6; c[k ? "lineTo" : "moveTo"](hx + hr * 0.85 * Math.cos(an), hy + hr * 0.85 * Math.sin(an)); }
+    const lit = (row * 7 + col + Math.floor(t * 3)) % 5 === 0;
+    c.fillStyle = lit ? `rgba(255,79,163,${0.6 + 0.4 * pulse})` : "rgba(255,120,180,.35)"; c.fill();
+  }
+  c.restore();
+  // eyes
+  const blink = (t % 3.3) > 3.15 ? 0.12 : 1;
+  for (const side of [-1, 1]) {
+    c.save(); c.translate(side * 22, 2); c.scale(1, blink);
+    c.fillStyle = "#1a0712"; c.beginPath(); c.ellipse(0, 0, 14, 19, 0, 0, 7); c.fill();
+    c.fillStyle = "#fff"; c.beginPath(); c.arc(4 + look * 4, -6, 5.5, 0, 7); c.fill(); c.beginPath(); c.arc(-4 + look * 3, 6, 2.4, 0, 7); c.fill();
+    c.restore();
+  }
+  // cheeks
+  c.fillStyle = "rgba(255,79,163,.45)"; for (const side of [-1, 1]) { c.beginPath(); c.ellipse(side * 40, 22, 11, 7, 0, 0, 7); c.fill(); }
+  // mouth
+  c.strokeStyle = "#1a0712"; c.lineWidth = 4.5; c.lineCap = "round"; c.beginPath();
+  if (mood > 0.5) { c.arc(0, 22, 14, 0.15 * Math.PI, 0.85 * Math.PI); }
+  else if (mood < -0.5) { c.arc(0, 42, 12, 1.2 * Math.PI, 1.8 * Math.PI); }
+  else { c.moveTo(-9, 32); c.lineTo(9, 32); }
+  c.stroke();
+  c.restore();
+  c.restore();
+}
+
+// --------------------------------------------------------------- pieces
+const POOLS = [["$ZORKA", "$41k", "PASS"], ["$PIPNU", "curve", "SKIP"], ["$HIVEBA", "$9k", "WATCH"], ["$REXLU", "$3k", "SKIP"], ["$BONFI", "$62k", "SKIP"], ["$KITSOL", "$28k", "SKIP"]];
+const VC = { PASS: GREEN, WATCH: AMBER, SKIP: RED };
+function card(x, y, name, liq, verdict, stamp, alpha) {
+  c.save(); c.globalAlpha = alpha;
+  rr(x - 190, y - 56, 380, 112, 18); c.fillStyle = "#0e0b12"; c.fill(); c.strokeStyle = "#2a2433"; c.lineWidth = 2; c.stroke();
+  text(name, x - 160, y - 6, "700 38px 'Space Grotesk'", BONE, "left", alpha);
+  text("liq " + liq, x - 160, y + 32, "500 22px 'JetBrains Mono'", DIM, "left", alpha);
+  if (stamp > 0) {
+    const k = back(stamp);
+    c.save(); c.translate(x + 110, y); c.rotate(-0.12); c.scale(k, k);
+    rr(-70, -26, 140, 52, 26); c.fillStyle = VC[verdict]; c.fill();
+    text(verdict, 0, 12, "700 30px 'Space Grotesk'", verdict === "SKIP" ? "#fff" : "#000");
+    c.restore();
+  }
+  c.restore();
+}
+function lobes(y, t0, t, alpha) {
+  const w = 176, gap = 14, x0 = W / 2 - (5 * w + 4 * gap) / 2;
+  LOBES.forEach(([n, col], i) => {
+    const on = clamp((t - t0 - i * 0.28) / 0.25), x = x0 + i * (w + gap);
+    c.globalAlpha = alpha;
+    rr(x, y, w, 64, 32); c.fillStyle = on > 0 ? col : "#15121a"; c.globalAlpha = alpha * (0.25 + 0.75 * on); c.fill();
+    c.globalAlpha = alpha;
+    text(n, x + w / 2, y + 42, "700 24px 'JetBrains Mono'", on > 0.5 ? "#000" : DIM, "center", alpha);
+  });
+  c.globalAlpha = 1;
+}
+function bar(x, y, w, frac, col, label, value, alpha) {
+  text(label, x, y - 16, "700 34px 'Space Grotesk'", col, "left", alpha);
+  text(value, x + w, y - 16, "700 52px 'Space Grotesk'", BONE, "right", alpha);
+  c.globalAlpha = alpha; rr(x, y, w, 30, 15); c.fillStyle = "#1c1822"; c.fill();
+  rr(x, y, Math.max(30, w * frac), 30, 15); c.fillStyle = col; c.fill(); c.globalAlpha = 1;
+}
+
+// ------------------------------------------------------------------ scenes
+function draw(t) {
+  bg(t);
+  // 1. arrival, 0 to 4.2
+  if (t < 4.4) {
+    const a = win(t, 0, 4.4);
+    const fly = ease(t / 1.6);
+    bee(W / 2 + (1 - fly) * 700, 560 + Math.sin(t * 3) * 10 - (1 - fly) * 200, 1.55, t, { mood: 1, look: -0.4 });
+    const wm = ease((t - 1.2) / 0.8);
+    c.save(); c.globalAlpha = wm * a;
+    const grad = c.createLinearGradient(W / 2 - 330, 0, W / 2 + 330, 0);
+    grad.addColorStop(0, BONE); grad.addColorStop(0.45, "#d9d6e2"); grad.addColorStop(0.75, SOFT); grad.addColorStop(1, PINK);
+    c.font = "700 120px 'Cinzel'"; c.textAlign = "center"; c.fillStyle = grad; c.fillText("BeeBrain", W / 2, 960);
+    c.restore();
+    text("I N S I D E   T H E   H I V E   M I N D", W / 2, 1020, "500 24px 'JetBrains Mono'", DIM, "center", ease((t - 1.8) / 0.6) * a);
+    rich([["a honeybee brain, ", BONE], ["simulated", PINK]], W / 2, 1130, 46, ease((t - 2.3) / 0.6) * a);
+    rich([["scoring memecoin pools.", BONE]], W / 2, 1190, 46, ease((t - 2.5) / 0.6) * a);
+  }
+  // 2. sniffing pools, 4 to 11
+  if (t > 4 && t < 11.2) {
+    const a = win(t, 4, 11.2);
+    rich([["it reads every ", BONE], ["new pool", PINK]], W / 2, 150, 58, a);
+    text("through five lobes, like a real bee", W / 2, 208, "500 28px 'JetBrains Mono'", DIM, "center", a);
+    bee(260, 520 + Math.sin(t * 3) * 8, 1.05, t, { mood: t > 8.9 ? -1 : t > 7.4 ? 1 : 0, look: 0.8 });
+    for (let i = 0; i < 3; i++) {
+      const [n, l, v] = POOLS[i], t0 = 4.6 + i * 1.5;
+      const slide = ease((t - t0) / 0.5), y = 400 + i * 150;
+      card(W - 250 + (1 - slide) * 500, y, n, l, v, (t - t0 - 0.9) / 0.35, slide * a);
+    }
+    lobes(880, 4.8, t, a);
+    // sparse code: 5% of kenyon cells light
+    const kc = rng(Math.floor(t * 2) + 3);
+    for (let k = 0; k < 400; k++) {
+      const x = 110 + (k % 40) * 21.8, y = 1000 + Math.floor(k / 40) * 21.8, lit = kc() < 0.05;
+      c.globalAlpha = a * (lit ? 1 : 0.25); c.fillStyle = lit ? PINK : "#3a2a3a"; c.fillRect(x, y, 13, 13);
+    }
+    c.globalAlpha = 1;
+    text("2,000 kenyon cells. 5% fire for each pool.", W / 2, 1260, "500 28px 'JetBrains Mono'", SOFT, "center", a);
+  }
+  // 3. skips most of them, 11 to 15
+  if (t > 11 && t < 15.2) {
+    const a = win(t, 11, 15.2);
+    rich([["it ", BONE], ["skips", RED], [" most of them.", BONE]], W / 2, 170, 64, a);
+    text("that is the job.", W / 2, 240, "500 32px 'JetBrains Mono'", DIM, "center", a);
+    POOLS.forEach(([n, l, v], i) => {
+      const col = i % 2, row = Math.floor(i / 2), t0 = 11.2 + i * 0.25;
+      card(300 + col * 480, 420 + row * 150, n, l, v, (t - t0 - 0.3) / 0.3, a * ease((t - t0) / 0.4));
+    });
+    bee(W / 2, 1050 + Math.sin(t * 3) * 8, 1.15, t, { mood: 0, look: Math.sin(t * 1.5) });
+  }
+  // 4. the real number, 15 to 20.5
+  if (t > 15 && t < 20.6) {
+    const a = win(t, 15, 20.6);
+    rich([["then I let it loose on ", BONE], ["real pools", PINK]], W / 2, 150, 54, a);
+    text("74 minutes on live solana · 516 pools · paper money", W / 2, 206, "500 26px 'JetBrains Mono'", DIM, "center", a);
+    text("price up 15 minutes after the verdict, fees in", W / 2, 330, "500 30px 'JetBrains Mono'", BONE, "center", a);
+    const g = ease((t - 15.8) / 1.6);
+    bar(150, 470, 780, 0.31 * g * 2.2, GREEN, "PASS", Math.round(31 * g) + "%", a);
+    bar(150, 640, 780, 0.13 * g * 2.2, RED, "SKIP", Math.round(13 * g) + "%", a);
+    rich([["its passes went up ", BONE], ["2.4x", AMBER], [" as often", BONE]], W / 2, 810, 48, a * ease((t - 17.4) / 0.5));
+    text("one run. an anecdote, not a result. that is why the field keeps running.", W / 2, 870, "500 22px 'JetBrains Mono'", DIM, "center", a * ease((t - 17.8) / 0.5));
+    bee(W / 2, 1090 + Math.sin(t * 3) * 8, 1.1, t, { mood: 1, look: 0 });
+  }
+  // 5. the race, 20.4 to 23
+  if (t > 20.4 && t < 23.2) {
+    const a = win(t, 20.4, 23.2);
+    rich([["now ", BONE], ["race it", PINK]], W / 2, 180, 72, a);
+    text("$500 of paper each: you, the bee, a random monkey", W / 2, 244, "500 28px 'JetBrains Mono'", DIM, "center", a);
+    const lanes = [["the bee", PINK], ["random", DIM], ["you", AMBER]];
+    lanes.forEach(([n, col], i) => {
+      const y = 420 + i * 170, p = ease((t - 20.6 - i * 0.12) / 2.0);
+      c.globalAlpha = a; rr(120, y, 840, 8, 4); c.fillStyle = "#221c28"; c.fill(); c.globalAlpha = 1;
+      text(n, 120, y - 24, "700 34px 'Space Grotesk'", col, "left", a);
+      if (i === 0) bee(170 + p * 700, y + 4, 0.42, t, { mood: 1 });
+      else if (i === 1) { c.globalAlpha = a; c.fillStyle = col; c.beginPath(); c.arc(170 + p * 420, y + 4, 16, 0, 7); c.fill(); c.globalAlpha = 1; }
+      else {
+        const pulse = 16 + 5 * Math.sin(t * 6);
+        c.globalAlpha = a; c.fillStyle = col; c.beginPath(); c.arc(150, y + 4, pulse, 0, 7); c.fill(); c.globalAlpha = 1;
+        text("your move", 190, y + 14, "700 30px 'JetBrains Mono'", col, "left", a);
+      }
+    });
+    text("in both first runs the bee finished ahead of random.", W / 2, 960, "500 26px 'JetBrains Mono'", BONE, "center", a);
+    text("it earns real money only after it beats random", W / 2, 1010, "500 24px 'JetBrains Mono'", DIM, "center", a);
+    text("over 300 pools, checked against the real price.", W / 2, 1048, "500 24px 'JetBrains Mono'", DIM, "center", a);
+  }
+  // 6. end card, 23 to 26
+  if (t > 23) {
+    const a = ease((t - 23) / 0.5);
+    bee(W / 2, 470 + Math.sin(t * 3) * 10, 1.5, t, { mood: 1, wave: 1, flap: 1.3 });
+    c.save(); c.globalAlpha = a;
+    const grad = c.createLinearGradient(W / 2 - 300, 0, W / 2 + 300, 0);
+    grad.addColorStop(0, BONE); grad.addColorStop(0.75, SOFT); grad.addColorStop(1, PINK);
+    c.font = "700 110px 'Cinzel'"; c.textAlign = "center"; c.fillStyle = grad; c.fillText("BeeBrain", W / 2, 820); c.restore();
+    rr(W / 2 - 300, 870, 600, 96, 48); c.globalAlpha = a; c.fillStyle = PINK; c.fill(); c.globalAlpha = 1;
+    text("beebrain.pro", W / 2, 934, "700 50px 'Space Grotesk'", "#000", "center", a);
+    text("race the bee on live pools", W / 2, 1020, "500 30px 'JetBrains Mono'", BONE, "center", a);
+    text("@beebrainnerve", W / 2, 1100, "700 38px 'Space Grotesk'", SOFT, "center", ease((t - 23.5) / 0.5));
+    const ca = ease((t - 24.1) / 0.4);
+    c.save(); c.translate(W / 2, 1200); c.scale(back(ca), back(ca));
+    rr(-150, -40, 300, 80, 40); c.globalAlpha = ca; c.fillStyle = AMBER; c.fill(); c.globalAlpha = 1;
+    text("CA soon", 0, 16, "700 44px 'Space Grotesk'", "#000", "center", ca);
+    c.restore();
+    text("paper only · not financial advice", W / 2, 1300, "500 20px 'JetBrains Mono'", "#6f6b78", "center", a);
+  }
+}
+window.draw = draw; window.DUR = DUR;
+</script></body></html>
