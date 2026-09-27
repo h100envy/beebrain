@@ -263,13 +263,8 @@ function draw(t) {
     rr(W / 2 - 300, 870, 600, 96, 48); c.globalAlpha = a; c.fillStyle = PINK; c.fill(); c.globalAlpha = 1;
     text("beebrain.pro", W / 2, 934, "700 50px 'Space Grotesk'", "#000", "center", a);
     text("race the bee on live pools", W / 2, 1020, "500 30px 'JetBrains Mono'", BONE, "center", a);
-    text("@beebrainnerve", W / 2, 1100, "700 38px 'Space Grotesk'", SOFT, "center", ease((t - 23.5) / 0.5));
-    const ca = ease((t - 24.1) / 0.4);
-    c.save(); c.translate(W / 2, 1200); c.scale(back(ca), back(ca));
-    rr(-150, -40, 300, 80, 40); c.globalAlpha = ca; c.fillStyle = AMBER; c.fill(); c.globalAlpha = 1;
-    text("CA soon", 0, 16, "700 44px 'Space Grotesk'", "#000", "center", ca);
-    c.restore();
-    text("paper only · not financial advice", W / 2, 1300, "500 20px 'JetBrains Mono'", "#6f6b78", "center", a);
+    text("@beebrainnerve", W / 2, 1130, "700 42px 'Space Grotesk'", SOFT, "center", ease((t - 23.5) / 0.5));
+    text("paper only · not financial advice", W / 2, 1290, "500 20px 'JetBrains Mono'", "#6f6b78", "center", a);
   }
 }
 window.draw = draw; window.DUR = DUR;
