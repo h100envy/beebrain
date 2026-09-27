@@ -10,7 +10,7 @@
 <script>
 /*
  promo for x, 1080x1350, 26 s. a pink bee mascot explains beebrain.
- every figure shown comes from docs/field-reports/2026-09-26-solana.md.
+ every figure shown comes from the three runs in docs/field-reports.
  pool names are made up from the sim's syllables, not real tokens.
 */
 const cv = document.getElementById("cv"), c = cv.getContext("2d");
@@ -221,13 +221,13 @@ function draw(t) {
   if (t > 15 && t < 20.6) {
     const a = win(t, 15, 20.6);
     rich([["then I let it loose on ", BONE], ["real pools", PINK]], W / 2, 150, 54, a);
-    text("74 minutes on live solana · 516 pools · paper money", W / 2, 206, "500 26px 'JetBrains Mono'", DIM, "center", a);
+    text("3 runs on solana and base · 1,483 pools · paper money", W / 2, 206, "500 26px 'JetBrains Mono'", DIM, "center", a);
     text("price up 15 minutes after the verdict, fees in", W / 2, 330, "500 30px 'JetBrains Mono'", BONE, "center", a);
     const g = ease((t - 15.8) / 1.6);
-    bar(150, 470, 780, 0.31 * g * 2.2, GREEN, "PASS", Math.round(31 * g) + "%", a);
-    bar(150, 640, 780, 0.13 * g * 2.2, RED, "SKIP", Math.round(13 * g) + "%", a);
-    rich([["its passes went up ", BONE], ["2.4x", AMBER], [" as often", BONE]], W / 2, 810, 48, a * ease((t - 17.4) / 0.5));
-    text("one run. an anecdote, not a result. that is why the field keeps running.", W / 2, 870, "500 22px 'JetBrains Mono'", DIM, "center", a * ease((t - 17.8) / 0.5));
+    bar(150, 470, 780, 0.30 * g * 2.2, GREEN, "PASS", Math.round(30 * g) + "%", a);
+    bar(150, 640, 780, 0.20 * g * 2.2, RED, "SKIP", Math.round(20 * g) + "%", a);
+    rich([["its passes went up ", BONE], ["1.5x", AMBER], [" as often", BONE]], W / 2, 810, 48, a * ease((t - 17.4) / 0.5));
+    text("an edge in hit rate, not yet in money. that is why the field keeps running.", W / 2, 870, "500 22px 'JetBrains Mono'", DIM, "center", a * ease((t - 17.8) / 0.5));
     bee(W / 2, 1090 + Math.sin(t * 3) * 8, 1.1, t, { mood: 1, look: 0 });
   }
   // 5. the race, 20.4 to 23
@@ -240,15 +240,16 @@ function draw(t) {
       const y = 420 + i * 170, p = ease((t - 20.6 - i * 0.12) / 2.0);
       c.globalAlpha = a; rr(120, y, 840, 8, 4); c.fillStyle = "#221c28"; c.fill(); c.globalAlpha = 1;
       text(n, 120, y - 24, "700 34px 'Space Grotesk'", col, "left", a);
-      if (i === 0) bee(170 + p * 700, y + 4, 0.42, t, { mood: 1 });
-      else if (i === 1) { c.globalAlpha = a; c.fillStyle = col; c.beginPath(); c.arc(170 + p * 420, y + 4, 16, 0, 7); c.fill(); c.globalAlpha = 1; }
+      // neck and neck: the scoreboard says 2 out of 3, not a runaway
+      if (i === 0) bee(170 + p * 620, y + 4, 0.42, t, { mood: 1 });
+      else if (i === 1) { c.globalAlpha = a; c.fillStyle = col; c.beginPath(); c.arc(170 + p * 560 + 40 * Math.sin(t * 2.2), y + 4, 16, 0, 7); c.fill(); c.globalAlpha = 1; }
       else {
         const pulse = 16 + 5 * Math.sin(t * 6);
         c.globalAlpha = a; c.fillStyle = col; c.beginPath(); c.arc(150, y + 4, pulse, 0, 7); c.fill(); c.globalAlpha = 1;
         text("your move", 190, y + 14, "700 30px 'JetBrains Mono'", col, "left", a);
       }
     });
-    text("in both first runs the bee finished ahead of random.", W / 2, 960, "500 26px 'JetBrains Mono'", BONE, "center", a);
+    text("so far the bee beat random in 2 runs out of 3.", W / 2, 960, "500 26px 'JetBrains Mono'", BONE, "center", a);
     text("it earns real money only after it beats random", W / 2, 1010, "500 24px 'JetBrains Mono'", DIM, "center", a);
     text("over 300 pools, checked against the real price.", W / 2, 1048, "500 24px 'JetBrains Mono'", DIM, "center", a);
   }

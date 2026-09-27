@@ -16,6 +16,13 @@ the browser and the terminal run the same code twice: `web/trade/bee.js` and `be
 (mulberry32, seed 5), the same constants, the same senses. `tests/test_field.py` feeds both the same real pools
 under node and python and checks they agree to the last bit.
 
+## a bee that arrives trained
+
+a new visitor on `/trade` does not start from an empty brain when a seed exists for the chain. `web/trade/seed-solana.json`
+holds the synapse weights and recent sparse codes of the 140 minute solana run in `docs/field-reports`, labelled on the page
+with how many real pools it has seen. from there it keeps learning in the visitor's browser. that run lost to random, and
+the page does not hide it: the seed is experience, not proof.
+
 ## data
 
 read only, public, no keys.

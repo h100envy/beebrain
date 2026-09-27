@@ -160,18 +160,17 @@ paper account from $500, nine days of 40 pools, fees in. `beebrain sim --seeds 0
 
 ### first contact with the real market
 
-the first headless field runs, 26 september 2026, a fresh bee on each chain, 15 minute forward test, fees in:
+three headless field runs, 26 september 2026, a fresh bee each time, 15 minute forward test, fees in:
 
-| | solana, 74 min | base, 80 min |
-| --- | --- | --- |
-| pools scored | 522 | 137 |
-| forward tested | 516 | 123 |
-| PASS hit rate | 31% (36 pools) | 17% (6 pools) |
-| SKIP by the brain, hit rate | 13% (238 pools) | 33% (21 pools) |
-| the bee | -30.3% | +1.0% |
-| random baseline | -69.8% | -16.7% |
+| | solana, 74 min | base, 80 min | solana, 140 min |
+| --- | --- | --- | --- |
+| forward tested | 516 | 123 | 844 |
+| PASS hit rate | 31% (36) | 17% (6) | 33% (18) |
+| SKIP by the brain, hit rate | 13% (238) | 33% (21) | 23% (502) |
+| the bee | -30.3% | +1.0% | -49.7% |
+| random baseline | -69.8% | -16.7% | +28.8% |
 
-**on solana the bee's passes went up three times as often as its skips, and it lost less than half what random lost. it still lost. the gate stays closed.** full reports and raw data: [docs/field-reports](docs/field-reports/).
+**across all 1,483 pools the bee's passes went up 30% of the time and its own skips 20%. it beat random in two runs out of three, and lost the longest one. the gate stays closed.** full reports and raw data: [docs/field-reports](docs/field-reports/).
 
 ## what it does not do
 

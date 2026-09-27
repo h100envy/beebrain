@@ -431,7 +431,8 @@
     // start a fresh session with the memory another run built: synapses, sparse codes, explore rate
     seedWith(mem, label) {
       if (!mem || !Array.isArray(mem.w) || mem.w.length !== C.N_KC) return false;
-      Object.assign(this.brain, { w: mem.w.slice(), eps: mem.eps, resolved: mem.resolved, memory: (mem.memory || []).slice(-300) });
+      Object.assign(this.brain, { w: mem.w.slice(), eps: mem.eps, resolved: mem.resolved, sugar: mem.sugar || 0, pain: mem.pain || 0,
+        memory: (mem.memory || []).slice(-300) });
       this.seededFrom = label;
       return true;
     }
