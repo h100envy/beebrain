@@ -89,6 +89,20 @@ def _scan(a):
     return 0
 
 
+def _bot(a):
+    from .bot.app import BeeBot, read_token
+    from .bot.telegram import Telegram
+    try:
+        token = read_token(a.token_file)
+    except OSError:
+        sys.stderr.write("no bot token. put the one @BotFather gave you in ~/.beebrain/bot.token (chmod 600) "
+                         "or in BEEBRAIN_BOT_TOKEN\n")
+        return 2
+    chains = [c.strip() for c in a.chains.split(",") if c.strip()]
+    BeeBot(Telegram(token), chains, channel=a.channel or None).run()
+    return 0
+
+
 def _forage(a):
     from .field.report import forage
     forage(a.chain, a.minutes, a.out, a.horizon)
@@ -173,6 +187,12 @@ def build_parser():
     sc.add_argument("--limit", type=int, default=25)
     sc.add_argument("--json", action="store_true")
     sc.set_defaults(fn=_scan)
+
+    bt = sub.add_parser("bot", help="run the telegram bot: live verdicts, alerts, paper accounts per user")
+    bt.add_argument("--chains", default="solana", help="comma list: solana,base,bsc,robinhood")
+    bt.add_argument("--token-file", default=None, help="default ~/.beebrain/bot.token, or set BEEBRAIN_BOT_TOKEN")
+    bt.add_argument("--channel", default="", help="also post every PASS to this channel, e.g. @yourchannel")
+    bt.set_defaults(fn=_bot)
 
     fo = sub.add_parser("forage", help="run the field headless for a while and save a report")
     fo.add_argument("--chain", default="solana", choices=("solana", "base", "bsc", "robinhood"))

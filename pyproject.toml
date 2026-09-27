@@ -32,7 +32,7 @@ Homepage = "https://github.com/h100envy/beebrain"
 Nerve = "https://github.com/h100envy/nerve"
 
 [tool.setuptools]
-packages = ["beebrain", "beebrain.terminal", "beebrain.field"]
+packages = ["beebrain", "beebrain.terminal", "beebrain.field", "beebrain.bot"]
 
 [tool.setuptools.dynamic]
 version = {attr = "beebrain.__version__"}

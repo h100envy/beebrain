@@ -2,6 +2,7 @@
 
 ## 0.3.0
 
+- the telegram bot: paste a CA and the bee scores it, /scan, /alerts, a paper account per user, /race. `beebrain bot`.
 - the field: the same brain on live memecoin pools from solana, base, bsc and robinhood chain. read only data from dexscreener and geckoterminal.
 - three paper accounts race from $500: you, the bee on autopilot, a random baseline behind the same reflexes.
 - forward test: every scored pool is priced again after 15 minutes, fees in. hit rate and average net return per verdict.

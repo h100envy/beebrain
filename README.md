@@ -47,6 +47,8 @@ beebrain scan --chain base --json  # one pass over the live field, for your own 
 beebrain forage --chain solana --minutes 60 --out solana.json && beebrain report solana.json
 ```
 
+there is a telegram bot too: paste any contract address and the bee scores it, `/alerts on` for every PASS, a $500 paper account per user. run your own with `beebrain bot`, see [docs/bot.md](docs/bot.md).
+
 or open [beebrain.pro/trade](https://beebrain.pro/trade/): nothing to install, the bee keeps learning in your browser. data is read only, from the public dexscreener and geckoterminal apis. how it works: [docs/field.md](docs/field.md).
 
 ## quick start
@@ -66,6 +68,7 @@ beebrain sim --seeds 0-9
 | `beebrain sim --seeds 5 --vector 120` | the waggle vector of one pool as json |
 | `beebrain trade --chain solana` | the field: live pools, three paper accounts, the forward test |
 | `beebrain scan --chain solana --json` | score the live field once and print every pool |
+| `beebrain bot --chains solana,base` | the telegram bot: score any CA, PASS alerts, paper accounts per user |
 | `beebrain forage --minutes 60 --out f.json` then `beebrain report f.json` | a headless field run and a markdown report: forward test, reflexes, the race, which senses moved with the outcome |
 | `beebrain render video\|stills\|figures` | the 3d video, point cloud stills and article figures. needs `pip install -e '.[render,figures]'` |
 
