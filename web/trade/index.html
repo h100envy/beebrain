@@ -46,6 +46,7 @@
     <div>
       <h1 class="deck-title">the field</h1>
       <p class="deck-sub">real pools, real prices, paper money. the bee scores every pool, you race it.</p>
+      <p id="seeded" class="seeded" hidden></p>
     </div>
     <div class="deck-controls">
       <div class="seg" role="group" aria-label="chain">
@@ -67,6 +68,7 @@
   <div class="deck-grid">
     <section class="panel col-field" aria-labelledby="h-field">
       <div class="panel-head"><h2 id="h-field">live pools</h2><span id="queue" class="dim"></span></div>
+      <label class="filter"><input id="lobes-only" type="checkbox"> only pools that reached the lobes</label>
       <ul id="field-list" class="field-list"></ul>
     </section>
 
@@ -109,6 +111,7 @@
             <button type="button" class="btn primary" data-buy="50">$50</button>
             <button type="button" class="btn primary" data-buy="100">$100</button>
             <a id="chart" class="btn" href="#" target="_blank" rel="noopener noreferrer" hidden>chart ↗</a>
+            <button id="copy-ca" type="button" class="btn" hidden>copy CA</button>
           </div>
           <p id="buy-note" class="dim" role="status"></p>
         </div>
@@ -121,6 +124,11 @@
         <div id="race" class="race"></div>
         <h3>open positions</h3>
         <ul id="positions" class="positions"></ul>
+      </div>
+      <div class="panel signals">
+        <div class="panel-head"><h2>signals</h2><button id="notify" type="button" class="toggle" aria-pressed="false">notify me on pass</button></div>
+        <ul id="signals" class="signals-list"></ul>
+        <p class="dim">every PASS, newest first. copy the CA and look for yourself. the bee is uncalibrated.</p>
       </div>
       <div class="panel">
         <div class="panel-head"><h2>forward test</h2><span class="dim">price +15 min, fees in</span></div>

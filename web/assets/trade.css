@@ -27,6 +27,8 @@
 .num { font-variant-numeric: tabular-nums; }
 
 /* field list */
+.filter { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--dim); margin: -4px 0 8px; cursor: pointer; }
+.filter input { accent-color: var(--pink); width: 16px; height: 16px; }
 .field-list { list-style: none; margin: 0; padding: 0; max-height: 1060px; overflow-y: auto; }
 .field-list .empty { color: var(--dim); font-size: 13px; padding: 8px 0; }
 .row-btn {
@@ -87,6 +89,19 @@
 .dance-row { display: grid; grid-template-columns: 120px 1fr; gap: 12px; align-items: center; margin-bottom: 6px; }
 .dance-row p { margin: 0; font-size: 12px; }
 #dance { width: 120px; height: 120px; }
+
+.signals-list { list-style: none; margin: 0; padding: 0; max-height: 260px; overflow-y: auto; }
+.signals-list li { display: grid; grid-template-columns: 1fr 60px 70px auto; gap: 8px; align-items: center; font-size: 13px; padding: 6px 0; border-bottom: 1px solid var(--line); }
+.signals-list .sym { color: var(--bone); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.signals-list .empty { display: block; color: var(--dim); }
+.seeded { margin: 8px 0 0; font-size: 12px; color: var(--amber); }
+.row.fresh .row-btn { animation: fresh 1.6s ease-out; }
+@keyframes fresh { from { background: rgba(255, 79, 163, .22); } }
+.row.fresh.pass .row-btn { animation-name: fresh-pass; }
+@keyframes fresh-pass { from { background: rgba(63, 224, 138, .28); } }
+.focus-flash { animation: flash .7s ease-out; }
+@keyframes flash { from { text-shadow: 0 0 18px currentColor; } }
+@media (prefers-reduced-motion: reduce) { .row.fresh .row-btn, .focus-flash { animation: none; } }
 
 /* race */
 .race { display: grid; gap: 10px; }

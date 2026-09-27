@@ -92,6 +92,29 @@ section { padding: 72px 0; border-top: 1px solid var(--line); }
   .frame .poster { display: block; }
 }
 
+/* live ticker */
+.ticker { margin-top: 34px; border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; background:
+  linear-gradient(120deg, rgba(255, 79, 163, .08), rgba(157, 124, 255, .06) 50%, rgba(255, 176, 74, .06)); }
+.tick-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 14px; color: var(--bone); }
+.tick-stat { color: var(--dim); font-size: 12px; margin-left: auto; }
+.live-dot { width: 9px; height: 9px; border-radius: 50%; background: #3fe08a; box-shadow: 0 0 12px #3fe08a; animation: beat 2s infinite; }
+@keyframes beat { 50% { opacity: .4; } }
+.tick-list { list-style: none; margin: 10px 0 6px; padding: 0; min-height: 40px; }
+.tick { display: grid; grid-template-columns: minmax(90px, 1fr) 70px 64px 2.2fr; gap: 10px; align-items: center; font-size: 13px;
+  padding: 7px 4px; border-bottom: 1px solid var(--line); animation: drop .5s ease-out; }
+.tick-sym { color: var(--bone); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tick-liq { color: var(--dim); }
+.tick-why { color: var(--dim); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chip { display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; text-align: center; }
+.chip.v-pass { color: #000; background: var(--green); }
+.chip.v-watch { color: #000; background: var(--amber); }
+.chip.v-skip { color: #fff; background: #4a1a24; }
+.tick.v-pass { box-shadow: inset 3px 0 0 var(--green); }
+@keyframes drop { from { opacity: 0; transform: translateY(-6px); } }
+.tick-cta { font-size: 13px; }
+@media (max-width: 480px) { .tick { grid-template-columns: 1fr 58px 56px; } .tick-why { grid-column: 1 / -1; } }
+@media (prefers-reduced-motion: reduce) { .tick, .live-dot { animation: none; } }
+
 /* blocks */
 .four p { font-size: 17px; margin: 0 0 6px; color: var(--bone); }
 .four p span { color: var(--dim); }

@@ -66,6 +66,12 @@
       </div>
     </div>
 
+    <div id="ticker" class="ticker" aria-live="polite">
+      <div class="tick-head"><span class="live-dot" aria-hidden="true"></span><b>the bee right now</b><span class="tick-stat">waking up the bee</span></div>
+      <ul class="tick-list"></ul>
+      <a class="tick-cta" href="trade/">race it with $500 of paper →</a>
+    </div>
+
     <div class="film">
       <figure>
         <div class="frame">
@@ -286,6 +292,8 @@ beebrain scan --json       # one pass over the live field, for your own tools</c
   <p>beebrain is research. the sim runs on synthetic pools, the field on real pools. both trade paper money. nothing here is financial advice.</p>
   <p>built on <a href="https://github.com/h100envy/nerve">nerve</a> · mit license · <a href="https://github.com/h100envy/beebrain">source</a> · <a href="https://x.com/beebrainnerve">@beebrainnerve on x</a></p>
 </footer>
+<script src="trade/bee.js"></script>
+<script src="assets/live.js"></script>
 <script>
   // reduced motion: keep the poster, never start the video
   (function () {

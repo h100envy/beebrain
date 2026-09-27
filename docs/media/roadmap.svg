@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="250" viewBox="0 0 1200 250">
+<defs><linearGradient id="l" gradientUnits="userSpaceOnUse" x1="130" y1="0" x2="1070" y2="0"><stop offset="0" stop-color="#ff4fa3"/><stop offset=".25" stop-color="#3fe08a"/><stop offset=".5" stop-color="#ffb04a"/><stop offset="1" stop-color="#c4a8ff"/></linearGradient><filter id="g" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="8"/></filter></defs>
+<rect width="1200" height="250" rx="16" fill="#07060a"/>
+<line x1="130" y1="92" x2="1070" y2="92" stroke="url(#l)" stroke-width="3" opacity=".8"/>
+<circle cx="130" cy="92" r="20" fill="#ff4fa3" opacity=".45" filter="url(#g)"/>
+<circle cx="130" cy="92" r="11" fill="#ff4fa3" stroke="#ff4fa3" stroke-width="3"/>
+<text x="130" y="46" text-anchor="middle" font-family="JetBrains Mono, Menlo, Consolas, monospace" font-size="13" fill="#ff4fa3" letter-spacing="2">DONE</text>
+<text x="130" y="148" text-anchor="middle" font-family="JetBrains Mono, Menlo, Consolas, monospace" font-size="20" font-weight="700" fill="#f3efe6">the sim</text>
+<text x="130" y="176" text-anchor="middle" font-family="JetBrains Mono, Menlo, Consolas, monospace" font-size="13" fill="#a09caa">five lobes, planted edge</text>
+<text x="130" y="198" text-anchor="middle" font-family="JetBrains Mono, Menlo, Consolas, monospace" font-size="13" fill="#a09caa">10 seeds, tests pin it</text>
+<circle cx="365" cy="92" r="20" fill="#3fe08a" opacity=".45" filter="url(#g)"/>
+<circle cx="365" cy="92" r="11" fill="#3fe08a" stroke="#3fe08a" stroke-width="3"/>
+<circle cx="365" cy="92" r="11" fill="none" stroke="#3fe08a" stroke-width="2"><animate attributeName="r" values="11;26;11" dur="2.4s" repeatCount="indefinite"/><animate attributeName="opacity" values="1;0;1" dur="2.4s" repeatCount="indefinite"/></circle>
+<text x="365" y="46" text-anchor="middle" font-family="JetBrains Mono, Menlo, Consolas, monospace" font-size="13" fill="#3fe08a" letter-spacing="2">LIVE NOW</text>
+<text x="365" y="148" text-anchor="middle" font-family="JetBrains Mono, Menlo, Consolas, monospace" font-size="20" font-weight="700" fill="#f3efe6">the field</text>
+<text x="365" y="176" text-anchor="middle" font-family="JetBrains Mono, Menlo, Consolas, monospace" font-size="13" fill="#a09caa">real pools, paper money</text>
+<text x="365" y="198" text-anchor="middle" font-family="JetBrains Mono, Menlo, Consolas, monospace" font-size="13" fill="#a09caa">race you and random</text>
+<circle cx="600" cy="92" r="20" fill="#ffb04a" opacity=".45" filter="url(#g)"/>
+<circle cx="600" cy="92" r="11" fill="#07060a" stroke="#ffb04a" stroke-width="3"/>
+<text x="600" y="46" text-anchor="middle" font-family="JetBrains Mono, Menlo, Consolas, monospace" font-size="13" fill="#ffb04a" letter-spacing="2">NEXT</text>
+<text x="600" y="148" text-anchor="middle" font-family="JetBrains Mono, Menlo, Consolas, monospace" font-size="20" font-weight="700" fill="#f3efe6">signals</text>
+<text x="600" y="176" text-anchor="middle" font-family="JetBrains Mono, Menlo, Consolas, monospace" font-size="13" fill="#a09caa">pass alerts, telegram, api</text>
+<text x="600" y="198" text-anchor="middle" font-family="JetBrains Mono, Menlo, Consolas, monospace" font-size="13" fill="#a09caa">read only wallet scoring</text>
+<circle cx="835" cy="92" r="20" fill="#9d7cff" opacity=".45" filter="url(#g)"/>
+<circle cx="835" cy="92" r="11" fill="#07060a" stroke="#9d7cff" stroke-width="3"/>
+<text x="835" y="46" text-anchor="middle" font-family="JetBrains Mono, Menlo, Consolas, monospace" font-size="13" fill="#9d7cff" letter-spacing="2">WHEN EARNED</text>
+<text x="835" y="148" text-anchor="middle" font-family="JetBrains Mono, Menlo, Consolas, monospace" font-size="20" font-weight="700" fill="#f3efe6">the gate</text>
+<text x="835" y="176" text-anchor="middle" font-family="JetBrains Mono, Menlo, Consolas, monospace" font-size="13" fill="#a09caa">300 pools, PASS beats SKIP</text>
+<text x="835" y="198" text-anchor="middle" font-family="JetBrains Mono, Menlo, Consolas, monospace" font-size="13" fill="#a09caa">bee beats random</text>
+<circle cx="1070" cy="92" r="20" fill="#c4a8ff" opacity=".45" filter="url(#g)"/>
+<circle cx="1070" cy="92" r="11" fill="#07060a" stroke="#c4a8ff" stroke-width="3"/>
+<text x="1070" y="46" text-anchor="middle" font-family="JetBrains Mono, Menlo, Consolas, monospace" font-size="13" fill="#c4a8ff" letter-spacing="2">AFTER THE GATE</text>
+<text x="1070" y="148" text-anchor="middle" font-family="JetBrains Mono, Menlo, Consolas, monospace" font-size="20" font-weight="700" fill="#f3efe6">execution</text>
+<text x="1070" y="176" text-anchor="middle" font-family="JetBrains Mono, Menlo, Consolas, monospace" font-size="13" fill="#a09caa">opt in, your own wallet</text>
+<text x="1070" y="198" text-anchor="middle" font-family="JetBrains Mono, Menlo, Consolas, monospace" font-size="13" fill="#a09caa">small size, hard limits</text>
+</svg>

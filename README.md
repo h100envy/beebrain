@@ -39,7 +39,7 @@ the sim runs on synthetic pools. the field runs the same brain on real pools. bo
 
 the field drops the bee on live memecoin pools from solana, base, bsc and robinhood chain. it scores every pool through five lobes. three paper accounts race from $500: you, the bee on autopilot, and a random baseline behind the same reflexes.
 
-every scored pool is checked again 15 minutes later, fees in, so each verdict gets a real hit rate. when PASS beats SKIP over 300 pools and the bee beats random, the graduation gate opens. until then it is paper only.
+every PASS lands in a signals list with a copy CA button and, if you want, a browser notification. every scored pool is checked again 15 minutes later, fees in, so each verdict gets a real hit rate. when PASS beats SKIP over 300 pools and the bee beats random, the graduation gate opens. until then it is paper only.
 
 ```
 beebrain trade --chain solana      # the field in the terminal. b buy, s sell, q quit
@@ -185,12 +185,17 @@ more in [docs/limitations.md](docs/limitations.md).
 
 ## roadmap
 
-- grok: reads the full waggle vector instead of one number, and waits a cycle when the antennal lobe flags dirty data.
-- jev cache: the bee scores after jev, learns when jev is right, and predicts its answer so repeat calls can be skipped.
-- router: the central complex sends each pool to jev, grok or the deep analyst, by which one wins on that pool type.
-- opus as sixth lobe: pools in the unsure zone go to opus 5.5, which reads the text the bee cannot.
-- the hive: one bee per chain, solana, robinhood chain and bsc, with separate antennae and a shared mushroom memory.
-- live execution: opt in, small size, only for a bee that opened the graduation gate on paper.
+<p align="center">
+  <img src="docs/media/roadmap.svg" width="100%" alt="roadmap: the sim is done, the field is live now, signals are next, then the graduation gate, then opt in execution after the gate">
+</p>
+
+- signals: pass alerts, a telegram bot and a json api, so you can act on the bee by hand.
+- read only wallet scoring: paste a public address, see how the bee would have scored every trade you made.
+- the hive: one bee per chain with a shared mushroom memory, and a bee that arrives trained instead of empty.
+- the gate: 300 forward tested pools, PASS beats the brain's own SKIP, the bee beats random.
+- execution after the gate: opt in, your own wallet signs, small size, hard limits. never custody.
+
+the full plan: [docs/roadmap.md](docs/roadmap.md).
 
 ## the article and the site
 

@@ -32,6 +32,8 @@ def snapshot(s, started_ms, feed):
         "closed": {k: a.closed for k, a in s.accounts.items()},
         "gate": s.gate(),
         "brain": {"sugar": s.brain.sugar, "pain": s.brain.pain, "eps": s.brain.eps, "resolved": s.brain.resolved},
+        # the whole memory, so a run can seed the next bee: synapse weights and recent sparse codes
+        "memory": s.to_json()["brain"],
         "log": s.fwd_log,
     }
 

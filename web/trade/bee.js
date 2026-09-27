@@ -338,7 +338,7 @@
       const v = t.verdict;
       this.counts[v]++;
       if (reasons.length) this.reflexed++;
-      const rec = { n: this.scored, t: now, pair: s.pair, symbol: s.symbol, name: s.name, url: s.url, price: s.price, liq: s.liq,
+      const rec = { n: this.scored, t: now, pair: s.pair, token: s.token, chain: s.chain, symbol: s.symbol, name: s.name, url: s.url, price: s.price, liq: s.liq,
         obs, noise, reasons, verdict: v, comb: t.comb, take: t.take, explore: t.explore, flag: t.flag,
         vector: waggleVector(pool, t), act: t.act, lobes: t.lobes, took: false };
       const bee = this.accounts.bee;
@@ -422,11 +422,18 @@
     }
     toJSON() {
       const b = this.brain;
-      return { v: 1, chain: this.chain, seed: this.seed, horizonMin: this.horizonMin, rng: this.rng.a, rrand: this.rrand.a,
+      return { v: 1, seededFrom: this.seededFrom || null, chain: this.chain, seed: this.seed, horizonMin: this.horizonMin, rng: this.rng.a, rrand: this.rrand.a,
         brain: { w: b.w, eps: b.eps, resolved: b.resolved, sugar: b.sugar, pain: b.pain, memory: b.memory.slice(-300) },
         accounts: this.accounts, shadows: this.shadows, fwd: this.fwd, fwdDropped: this.fwdDropped, fwdRecent: this.fwdRecent.slice(-60),
         counts: this.counts, scored: this.scored, beeTakes: this.beeTakes, reflexed: this.reflexed,
         seen: Array.from(this.seen).slice(-3000), log: this.log.slice(-40), started: this.started };
+    }
+    // start a fresh session with the memory another run built: synapses, sparse codes, explore rate
+    seedWith(mem, label) {
+      if (!mem || !Array.isArray(mem.w) || mem.w.length !== C.N_KC) return false;
+      Object.assign(this.brain, { w: mem.w.slice(), eps: mem.eps, resolved: mem.resolved, memory: (mem.memory || []).slice(-300) });
+      this.seededFrom = label;
+      return true;
     }
     static from(d) {
       const s = new FieldSession(d.chain, d.seed, d.horizonMin);
@@ -435,7 +442,8 @@
       s.accounts = { you: Account.from(d.accounts.you), bee: Account.from(d.accounts.bee), random: Account.from(d.accounts.random) };
       d.fwd.BRAIN_SKIP = d.fwd.BRAIN_SKIP || { n: 0, wins: 0, net: 0 };
       Object.assign(s, { shadows: d.shadows, fwd: d.fwd, fwdDropped: d.fwdDropped, fwdRecent: d.fwdRecent || [], counts: d.counts,
-        scored: d.scored, beeTakes: d.beeTakes, reflexed: d.reflexed, seen: new Set(d.seen), log: d.log || [], started: d.started || Date.now() });
+        scored: d.scored, beeTakes: d.beeTakes, reflexed: d.reflexed, seen: new Set(d.seen), log: d.log || [], started: d.started || Date.now(),
+        seededFrom: d.seededFrom || null });
       return s;
     }
   }

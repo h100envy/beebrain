@@ -18,7 +18,7 @@
     if (text !== undefined) e.textContent = text;
     return e;
   }
-  const usd = (v) => (v >= 1e6 ? "$" + (v / 1e6).toFixed(1) + "m" : v >= 1e3 ? "$" + (v / 1e3).toFixed(0) + "k" : "$" + v.toFixed(0));
+  const usd = (v) => (v <= 0 ? "curve" : v >= 1e6 ? "$" + (v / 1e6).toFixed(1) + "m" : v >= 1e3 ? "$" + (v / 1e3).toFixed(0) + "k" : "$" + v.toFixed(0));
   const money = (v) => "$" + v.toLocaleString("en-US", { maximumFractionDigits: 0 });
   const age = (now, ms) => {
     if (!ms) return "?";
@@ -52,7 +52,17 @@
   function load(c) {
     const raw = store.get(KEY(c));
     if (raw) { try { return B.FieldSession.from(JSON.parse(raw)); } catch (e) { /* start clean */ } }
-    return new B.FieldSession(c);
+    const s = new B.FieldSession(c);
+    // a new visitor gets the bee a long headless run trained on this chain, if there is one
+    fetch("seed-" + c + ".json").then((r) => (r.ok ? r.json() : null)).then((seed) => {
+      if (seed && S === s && S.scored === 0 && s.seedWith(seed.memory, seed.label)) { save(); renderSeeded(); }
+    }).catch(() => {});
+    return s;
+  }
+  function renderSeeded() {
+    const p = $("seeded");
+    p.hidden = !S.seededFrom;
+    p.textContent = S.seededFrom ? "this bee arrived with memory: " + S.seededFrom + ". it keeps learning here." : "";
   }
   function save() { if (S) store.set(KEY(S.chain), JSON.stringify(S)); }
   function start(c) {
@@ -61,6 +71,7 @@
     S = load(c); feed = new B.Feed(c); selected = null; follow = true;
     T.poll = 0;
     for (const b of document.querySelectorAll("[data-chain]")) b.setAttribute("aria-pressed", String(b.dataset.chain === c));
+    renderSeeded();
     renderAll();
   }
 
@@ -85,14 +96,46 @@
     if (now - T.score > every && S.queue.length) {
       T.score = now;
       const r = S.scoreNext(now);
-      if (r) { if (follow) selected = r; brain.fire(r); }
+      if (r) { if (follow) selected = r; brain.fire(r); if (r.verdict === "PASS") notifyPass(r); }
     }
     if (now - T.save > 10000) { T.save = now; save(); }
     if (now - T.ui > 500) { T.ui = now; renderAll(); }
   }
 
   // -------------------------------------------------------------- render
+  let signalsSeen = 0;
+  function renderSignals() {
+    const ul = $("signals");
+    ul.replaceChildren();
+    const passes = S.recent.filter((r) => r.verdict === "PASS").slice(-12).reverse();
+    if (!passes.length) { ul.append(el("li", "empty", "no pass yet. most pools are skipped, that is the job.")); return; }
+    for (const r of passes) {
+      const li = el("li");
+      const go = el("button", "mini", "focus");
+      go.type = "button"; go.setAttribute("aria-label", "focus $" + r.symbol);
+      go.addEventListener("click", () => { selected = r; follow = false; renderAll(); brain.fire(r); });
+      const cp = el("button", "mini", "CA");
+      cp.type = "button"; cp.setAttribute("aria-label", "copy contract address of $" + r.symbol);
+      cp.addEventListener("click", () => copyCa(r.token, cp));
+      li.append(el("span", "sym", "$" + r.symbol), el("span", "dim", new Date(r.t).toTimeString().slice(0, 5)), go, cp);
+      ul.append(li);
+    }
+  }
+  function notifyPass(r) {
+    if (!notifyOn || !("Notification" in window) || Notification.permission !== "granted") return;
+    try { new Notification("the bee passed $" + r.symbol, { body: "score " + r.comb.toFixed(2) + " · liq " + usd(r.liq) + " · paper only, not advice", tag: r.pair }); }
+    catch (e) { /* some browsers only allow notifications from a service worker */ }
+  }
+  let notifyOn = store.get("beebrain.field.notify") === "1";
+  async function copyCa(ca, btn) {
+    if (!ca) return;
+    try { await navigator.clipboard.writeText(ca); btn.textContent = "copied"; }
+    catch (e) { btn.textContent = ca.slice(0, 6) + "…"; }
+    setTimeout(() => { btn.textContent = btn.id === "copy-ca" ? "copy CA" : "CA"; }, 1500);
+  }
+
   function renderAll() {
+    renderSignals();
     renderStatus(); renderField(); renderFocus(); renderTrail(); renderRace(); renderForward(); renderLog();
   }
 
@@ -125,10 +168,12 @@
   function renderField() {
     const list = $("field-list"), now = Date.now();
     list.replaceChildren();
-    const rows = S.recent.slice(-40).reverse();
+    const lobesOnly = $("lobes-only").checked;
+    const rows = S.recent.filter((r) => !lobesOnly || !r.reasons.length).slice(-40).reverse();
     if (!rows.length) { list.append(el("li", "empty", "the bee is flying out. first pools land in a few seconds.")); return; }
     for (const r of rows) {
-      const li = el("li", "row" + (selected && selected.pair === r.pair ? " sel" : ""));
+      const fresh = Date.now() - r.t < 2500 ? " fresh" + (r.verdict === "PASS" ? " pass" : "") : "";
+      const li = el("li", "row" + fresh + (selected && selected.pair === r.pair ? " sel" : ""));
       const btn = el("button", "row-btn");
       btn.type = "button";
       btn.setAttribute("aria-label", "$" + r.symbol + ", " + r.verdict.toLowerCase() + ", liquidity " + usd(r.liq));
@@ -156,6 +201,9 @@
       r.explore ? "explore entry, small size" : "score " + r.comb.toFixed(2) + (r.took ? " · the bee went in" : ""));
     const link = $("chart"), u = safeUrl(sn.url || r.url);
     if (u) { link.href = u; link.hidden = false; } else link.hidden = true;
+    const ca = $("copy-ca");
+    ca.hidden = !r.token; ca.dataset.ca = r.token || "";
+    if (v.dataset.pair !== r.pair) { v.dataset.pair = r.pair; v.classList.remove("focus-flash"); void v.offsetWidth; v.classList.add("focus-flash"); }
     const senses = $("senses");
     senses.replaceChildren();
     for (const f of C.FEATS) {
@@ -438,6 +486,19 @@
     $("follow").addEventListener("click", () => { follow = !follow; if (follow && S.last) selected = S.last; renderAll(); });
     $("export").addEventListener("click", exportCsv);
     $("share").addEventListener("click", shareCard);
+    const lo = $("lobes-only");
+    lo.checked = store.get("beebrain.field.lobesOnly") === "1";
+    lo.addEventListener("change", () => { store.set("beebrain.field.lobesOnly", lo.checked ? "1" : "0"); renderField(); });
+    $("copy-ca").addEventListener("click", () => copyCa($("copy-ca").dataset.ca, $("copy-ca")));
+    const nb = $("notify");
+    nb.setAttribute("aria-pressed", String(notifyOn));
+    nb.addEventListener("click", async () => {
+      if (!notifyOn && "Notification" in window && Notification.permission !== "granted") {
+        const p = await Notification.requestPermission();
+        if (p !== "granted") { nb.textContent = "notifications blocked"; return; }
+      }
+      notifyOn = !notifyOn; store.set("beebrain.field.notify", notifyOn ? "1" : "0"); nb.setAttribute("aria-pressed", String(notifyOn));
+    });
     if (!store.get("beebrain.field.intro")) $("intro").hidden = false;
     $("intro-close").addEventListener("click", () => { $("intro").hidden = true; store.set("beebrain.field.intro", "1"); });
     $("reset").addEventListener("click", () => {
