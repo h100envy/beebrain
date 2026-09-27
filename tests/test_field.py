@@ -241,3 +241,10 @@ def test_report_from_a_session():
     assert "## forward test" in md and "killed by a reflex" in md and "bee score" in md
     assert len(d["log"]) == 12
     assert spearman([1, 2, 3, 4, 5, 6, 7, 8], [2, 4, 6, 8, 10, 12, 14, 16]) == pytest.approx(1.0)
+
+
+def test_seed_file_loads_into_a_python_session():
+    seed = json.load(open(os.path.join(HERE, "..", "web", "trade", "seed-solana.json")))
+    s = FieldSession("solana")
+    assert s.seed_with(seed["memory"], seed["label"])
+    assert s.brain.eps < 0.5 and len(s.brain.memory) > 0 and s.seeded_from.startswith("844")

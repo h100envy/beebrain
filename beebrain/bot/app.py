@@ -76,7 +76,18 @@ class Field:
             with open(self.path) as fh:
                 return FieldSession.from_json(json.load(fh))
         except (OSError, ValueError, KeyError):
-            return FieldSession(self.chain)
+            pass
+        s = FieldSession(self.chain)
+        # a fresh bot bee starts from the same seed the site uses, when the repo has one
+        seed = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
+                            "web", "trade", "seed-%s.json" % self.chain)
+        try:
+            with open(seed) as fh:
+                d = json.load(fh)
+            s.seed_with(d["memory"], d["label"])
+        except (OSError, ValueError, KeyError):
+            pass
+        return s
 
     def save(self):
         with self.lock:

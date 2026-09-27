@@ -231,6 +231,18 @@ class FieldSession:
                   ("bee beats random", bee > rnd, "$%.0f vs $%.0f" % (bee, rnd))]
         return {"open": all(c[1] for c in checks), "checks": checks}
 
+    def seed_with(self, mem, label):
+        """start from the memory another run built: synapses, sparse codes, explore rate. the browser twin is seedWith."""
+        if not mem or len(mem.get("w", [])) != len(self.brain.w):
+            return False
+        b = self.brain
+        b.w, b.eps, b.resolved = list(mem["w"]), mem["eps"], mem["resolved"]
+        b.sugar, b.pain = mem.get("sugar", 0), mem.get("pain", 0)
+        for a, w in mem.get("memory", [])[-300:]:
+            b.memory.append((frozenset(a), w))
+        self.seeded_from = label
+        return True
+
     # ---------------------------------------------------------- state ---
     def to_json(self):
         b = self.brain
