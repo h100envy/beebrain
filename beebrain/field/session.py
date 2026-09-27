@@ -122,7 +122,8 @@ class FieldSession:
         if reasons:
             self.reflexed += 1
         vec = waggle_vector(pool, t)
-        rec = {"n": self.scored, "t": now_ms, "pair": s["pair"], "token": s.get("token", ""), "chain": s.get("chain", ""), "symbol": s["symbol"], "name": s["name"],
+        rec = {"n": self.scored, "t": now_ms, "pair": s["pair"], "token": s.get("token", ""), "chain": s.get("chain", ""),
+               "symbol": s["symbol"], "name": s["name"],
                "url": s.get("url", ""), "price": s["price"], "liq": s["liq"], "obs": obs, "noise": noise,
                "reasons": reasons, "verdict": v, "comb": t["comb"], "take": t["take"], "explore": t["explore"],
                "flag": t["flag"], "vector": vec, "act": sorted(t["act"])}
