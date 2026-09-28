@@ -52,7 +52,7 @@ the sim runs on synthetic pools. the field runs the same brain on real pools. bo
 
 <img src="web/assets/brand/field.png" width="100%" alt="the field page: live pools on the left, the bee brain and its senses in the middle, three paper accounts racing on the right">
 
-the field drops the bee on live memecoin pools from solana, base, bsc and robinhood chain. it scores every pool through five lobes. three paper accounts race from $500: you, the bee on autopilot, and a random baseline behind the same reflexes.
+the field drops the bee on live memecoin pools from solana, base, bsc and Robinhood Chain. it scores every pool through five lobes. three paper accounts race from $500: you, the bee on autopilot, and a random baseline behind the same reflexes.
 
 every PASS lands in a signals list with a copy CA button and, if you want, a browser notification. every scored pool is checked again 15 minutes later, fees in, so each verdict gets a real hit rate. when PASS beats SKIP over 300 pools and the bee beats random, the graduation gate opens. until then it is paper only.
 
@@ -65,6 +65,8 @@ beebrain forage --chain solana --minutes 60 --out solana.json && beebrain report
 there is a telegram bot too: paste any contract address and the bee scores it, `/alerts on` for every PASS, a $500 paper account per user. run your own with `beebrain bot`, see [docs/bot.md](docs/bot.md).
 
 or open [beebrain.pro/trade](https://beebrain.pro/trade/): nothing to install, the bee keeps learning in your browser. data is read only, from the public dexscreener and geckoterminal apis. how it works: [docs/field.md](docs/field.md).
+
+the bot also has `/history` for recent signal prices and outcomes, and `/status` for feed and menu status.
 
 ## quick start
 
@@ -83,7 +85,8 @@ beebrain sim --seeds 0-9
 | `beebrain sim --seeds 5 --vector 120` | the waggle vector of one pool as json |
 | `beebrain trade --chain solana` | the field: live pools, three paper accounts, the forward test |
 | `beebrain scan --chain solana --json` | score the live field once and print every pool |
-| `beebrain bot --chains solana,base` | the telegram bot: score any CA, PASS alerts, paper accounts per user |
+| `beebrain bot --check` | read-only check of telegram credentials, command menu and webhook configuration |
+| `beebrain bot --chains solana,robinhood` | the telegram bot: score any CA, PASS alerts, paper accounts per user |
 | `beebrain forage --minutes 60 --out f.json` then `beebrain report f.json` | a headless field run and a markdown report: forward test, reflexes, the race, which senses moved with the outcome |
 | `beebrain render video\|stills\|figures` | the 3d video, point cloud stills and article figures. needs `pip install -e '.[render,figures]'` |
 

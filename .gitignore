@@ -9,3 +9,6 @@ __pycache__/
 dist/
 .DS_Store
 ._*
+
+# rendered launch videos; editable sources and folder instructions stay tracked
+videos-with-ca/*.mp4

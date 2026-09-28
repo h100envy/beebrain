@@ -1,5 +1,15 @@
 # changelog
 
+## unreleased
+
+- Robinhood Chain appears as a named network in the website field and joins Solana in the bot default; its market feed uses DexScreener.
+- bot startup and polling retry transient telegram failures and respect polling retry-after responses.
+- failed menu registration no longer stops command handling; the commands button is set explicitly and setup retries.
+- `/history [all|pass|watch|skip] [page]`: latest 1,000 scored pools per chain, including pending, resolved and unavailable prices.
+- history persists across restarts. resolved entries show entry price, observed price, actual observation time and returns after the 2% fee model.
+- `/status` shows menu, polling and field status. `beebrain bot --check` diagnoses api configuration without reading updates or sending messages.
+- `--state-dir` and a systemd template for supervised operation. no live deployment is implied by this entry.
+
 ## 0.3.0
 
 - the telegram bot: paste a CA and the bee scores it, /scan, /alerts, a paper account per user, /race. `beebrain bot`.

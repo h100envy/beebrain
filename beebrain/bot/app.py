@@ -2,7 +2,7 @@
 the beebrain telegram bot. the same field as /trade and `beebrain trade`: the bee scores
 live pools, and every user gets a paper account of their own.
 
-  beebrain bot --token-file ~/.beebrain/bot.token --chains solana,base [--channel @yourchannel]
+  beebrain bot --token-file ~/.beebrain/bot.token --chains solana,robinhood [--channel @yourchannel]
 
 commands
   /start /help         what this is
@@ -15,6 +15,7 @@ commands
 
 read only market data, paper money. no wallets, no keys, no orders.
 """
+from datetime import datetime, timezone
 import html
 import json
 import os
@@ -26,7 +27,7 @@ from ..field.feed import CHAINS, Feed, now_ms
 from ..field.features import FieldPool, features
 from ..field.paper import START, Account
 from ..field.rng import FieldRng
-from ..field.session import FieldSession
+from ..field.session import FieldSession, HISTORY_LIMIT
 from .telegram import TelegramError
 
 SCORE_EVERY_S = 1.5
@@ -35,6 +36,14 @@ SAVE_EVERY_S = 60.0
 ALERT_GAP_S = 15.0
 CMD_GAP_S = 0.8
 MAX_BUY = 500.0
+MENU_RETRY_S = 60.0
+COMMANDS = [{"command": name, "description": description} for name, description in (
+    ("start", "start here"), ("scan", "the best pools the bee scored"),
+    ("history", "signal prices and outcomes, including losses"), ("status", "bot and market feed status"),
+    ("race", "you vs the bee vs random"), ("me", "your paper account"),
+    ("alerts", "on or off: a message for every PASS"), ("chain", "switch chain"),
+    ("buy", "paper buy: contract address and amount"), ("sell", "close a paper position by number"),
+    ("help", "commands and examples"))]
 SITE = "https://beebrain.pro/trade/"
 
 SOL_CA = re.compile(r"^[1-9A-HJ-NP-Za-km-z]{32,44}$")
@@ -110,6 +119,12 @@ class BeeBot:
         self.path = os.path.join(self.state_dir, "bot.json")
         self.users, self.offset = {}, 0
         self.last_cmd, self.last_alert = {}, {}
+        self.state_lock = threading.RLock()
+        self.menu_ready = False
+        self.started_at = time.time()
+        self.last_poll_at = None
+        self.field_ok_at = {}
+        self.field_errors = {}
         self.load()
 
     # ------------------------------------------------------------- state
@@ -126,6 +141,10 @@ class BeeBot:
                                "acct": {c: Account.from_json(a) for c, a in u.get("acct", {}).items()}}
 
     def save(self):
+        with self.state_lock:
+            self._save()
+
+    def _save(self):
         d = {"offset": self.offset, "users": {uid: {"chain": u["chain"], "alerts": u["alerts"], "chat": u["chat"], "name": u["name"],
                                                     "acct": {c: a.to_json() for c, a in u["acct"].items()}}
                                               for uid, u in self.users.items()}}
@@ -152,20 +171,21 @@ class BeeBot:
 
     # ------------------------------------------------------------- field
     def tracked(self, f):
-        out = f.s.tracked(25)
-        for u in self.users.values():
-            a = u["acct"].get(f.chain)
-            for p in (a.open if a else []):
-                if p.pair not in out:
-                    out.append(p.pair)
-        return out[:30]
+        with self.state_lock, f.lock:
+            out = f.s.tracked(25)
+            for u in self.users.values():
+                a = u["acct"].get(f.chain)
+                for p in (a.open if a else []):
+                    if p.pair not in out:
+                        out.append(p.pair)
+            return out[:30]
 
     def tick_field(self, f):
         """poll, score, mark. returns (new PASS records, closed user positions)"""
         t = self.clock()
         new, fresh = f.feed.poll(t, self.tracked(f))
         passes, closes = [], []
-        with f.lock:
+        with self.state_lock, f.lock:
             now = now_ms()
             f.s.ingest(new, now)
             f.s.ingest(fresh, now)
@@ -242,6 +262,10 @@ class BeeBot:
 
     # ---------------------------------------------------------- commands
     def handle(self, upd):
+        with self.state_lock:
+            return self._handle(upd)
+
+    def _handle(self, upd):
         if "callback_query" in upd:
             return self.on_callback(upd["callback_query"])
         m = upd.get("message") or {}
@@ -261,6 +285,10 @@ class BeeBot:
             return self.tg.send(chat, self.help_text(u))
         if cmd == "/scan":
             return self.cmd_scan(chat, f)
+        if cmd == "/history":
+            return self.tg.send(chat, self.history_text(f, arg))
+        if cmd == "/status":
+            return self.tg.send(chat, self.status_text(f))
         if cmd == "/alerts":
             u["alerts"] = arg.strip().lower() != "off"
             return self.tg.send(chat, "alerts %s. %s" % ("on" if u["alerts"] else "off",
@@ -301,6 +329,7 @@ class BeeBot:
     def help_text(self, u):
         return ("🐝 <b>BeeBrain</b>\na honeybee brain, simulated, scoring live memecoin pools.\n\n"
                 "paste any <b>contract address</b> and the bee scores it.\n"
+                "/history  recent signals and their outcomes\n/status  bot and feed status\n"
                 "/scan  the best pools right now\n/alerts on  a message for every PASS\n"
                 "/buy &lt;CA&gt; 50  paper trade, you start with $500\n/sell 1  close a position\n/me  your paper account\n"
                 "/race  you vs the bee vs random, and the forward test\n/chain %s\n\n"
@@ -319,6 +348,67 @@ class BeeBot:
                 DOT[r["verdict"]], esc(r["symbol"]), r["comb"], usd(r["liq"]), esc(r.get("token", ""))))
         lines.append("\n<i>tap a CA to copy it. paste it back here for the full read.</i>")
         return self.tg.send(chat, "\n".join(lines))
+
+    @staticmethod
+    def utc(t_ms):
+        if t_ms is None:
+            return "unknown"
+        return datetime.fromtimestamp(t_ms / 1000, timezone.utc).strftime("%m-%d %H:%M:%S UTC")
+
+    def history_text(self, f, arg=""):
+        args = arg.lower().split()
+        verdict = "ALL"
+        if args and args[0] in ("all", "pass", "watch", "skip"):
+            verdict = args.pop(0).upper()
+        try:
+            page = int(args[0]) if len(args) == 1 else 1
+            if len(args) > 1 or page < 1:
+                raise ValueError
+        except ValueError:
+            return "usage: /history [all|pass|watch|skip] [page]"
+        with f.lock:
+            rows = [dict(r) for r in reversed(f.s.history) if verdict == "ALL" or r["verdict"] == verdict]
+            fw = f.s.forward()
+            pending, dropped = len(f.s.shadows), f.s.fwd_dropped
+            horizon = f.s.horizon_min
+        pages = max(1, (len(rows) + 4) // 5)
+        if page > pages:
+            return "history has %d pages. try /history %s %d" % (pages, verdict.lower(), pages)
+        lines = ["<b>signal history</b> · %s · %s · page %d/%d" % (f.chain, verdict.lower(), page, pages),
+                 "target +%g min · 2%% round-trip fee model · no slippage" % horizon,
+                 "all-time: %d resolved · %d pending · %d unavailable" % (
+                     sum(fw[v]["n"] for v in ("PASS", "WATCH", "SKIP")), pending, dropped)]
+        if not rows:
+            lines.append("no recorded signals yet. historical totals may predate this ledger.")
+        for r in rows[(page - 1) * 5:page * 5]:
+            lines += ["", "%s <b>$%s</b> · %s" % (DOT[r["verdict"]], esc(r["symbol"][:32]), r["verdict"]),
+                      "scored %s · price %.6g" % (self.utc(r["t0"]), r["p0"])]
+            if r["status"] == "resolved":
+                lines.append("observed %s · price %.6g" % (self.utc(r.get("observed_at")), r["p1"]))
+                lines.append("price %s · after fee %s" % (pct(r["ret"]), pct(r["net"])))
+            elif r["status"] == "unavailable":
+                lines.append("unavailable: no fresh price before the timeout; excluded from returns")
+            else:
+                lines.append("pending · target %s" % self.utc(r["due"]))
+            token = r.get("token") or r["pair"]
+            lines.append("<code>%s</code>" % esc(token[:64]))
+        lines += ["", "last %d scored pools retained; totals include older records." % HISTORY_LIMIT,
+                  "next: /history %s %d" % (verdict.lower(), page + 1) if page < pages else "end of retained history",
+                  "<i>paper evaluation, not executed trades. not advice.</i>"]
+        return "\n".join(lines)
+
+    def status_text(self, f):
+        last = self.field_ok_at.get(f.chain)
+        age = "not yet" if last is None else "%ds ago" % max(0, time.time() - last)
+        poll_age = "not yet" if self.last_poll_at is None else "%ds ago" % max(0, time.time() - self.last_poll_at)
+        with f.lock:
+            scored, pending = f.s.scored, len(f.s.shadows)
+            feed_status = f.feed.status
+        return ("<b>bot status</b> · %s\nmenu: %s\nlast successful field tick: %s\n"
+                "last telegram poll: %s\n"
+                "feed: %s\nscored %d · pending %d\nfield error: %s" % (
+                    f.chain, "ready" if self.menu_ready else "retrying", age, poll_age, esc(str(feed_status)[:160]),
+                    scored, pending, esc(self.field_errors.get(f.chain, "none"))))
 
     def me_text(self, u):
         a = self.account(u)
@@ -393,7 +483,8 @@ class BeeBot:
             buttons = [[{"text": "paper $50", "callback_data": "b:50:" + r["pair"][:52]}]]
             if r.get("url", "").startswith("https://dexscreener.com/"):
                 buttons[0].append({"text": "chart ↗", "url": r["url"]})
-            targets = [u["chat"] for u in self.users.values() if u["alerts"] and u["chain"] == f.chain and u["chat"]]
+            with self.state_lock:
+                targets = [u["chat"] for u in self.users.values() if u["alerts"] and u["chain"] == f.chain and u["chat"]]
             if self.channel:
                 targets.append(self.channel)
             for chat in targets:
@@ -411,50 +502,105 @@ class BeeBot:
         except (TelegramError, OSError):
             pass
 
-    def run(self, say=print):
-        stop = threading.Event()
+    def setup_menu(self, say=print):
+        try:
+            self.tg.call("setMyCommands", commands=COMMANDS)
+            self.tg.call("setChatMenuButton", menu_button={"type": "commands"})
+        except (TelegramError, OSError) as e:
+            self.menu_ready = False
+            say("menu setup failed (%s); commands still work, retrying" % type(e).__name__)
+            return False
+        self.menu_ready = True
+        return True
+
+    @staticmethod
+    def retry_delay(error):
+        return max(3, getattr(error, "retry_after", None) or 3)
+
+    def run(self, say=print, stop=None):
+        stop = stop or threading.Event()
 
         def fields():
-            t_save = time.time()
+            t_save = time.monotonic()
             while not stop.is_set():
                 for f in self.fields.values():
                     try:
                         self.broadcast(f, *self.tick_field(f))
-                    except Exception as e:          # a bad tick must not kill the bot
-                        say("field %s: %s" % (f.chain, e))
-                if time.time() - t_save > SAVE_EVERY_S:
-                    t_save = time.time()
-                    self.save()
+                        self.field_ok_at[f.chain] = time.time()
+                        self.field_errors.pop(f.chain, None)
+                    except Exception as e:
+                        self.field_errors[f.chain] = type(e).__name__
+                        say("field %s: %s" % (f.chain, type(e).__name__))
+                if time.monotonic() - t_save > SAVE_EVERY_S:
+                    t_save = time.monotonic()
+                    try:
+                        self.save()
+                    except OSError as e:
+                        say("state save failed: %s" % type(e).__name__)
                 stop.wait(0.5)
 
-        th = threading.Thread(target=fields, daemon=True)
-        th.start()
-        me = self.tg.call("getMe")
-        say("beebrain bot @%s on %s. ctrl-c to stop." % (me.get("username"), ", ".join(self.fields)))
-        self.tg.call("setMyCommands", commands=[
-            {"command": "scan", "description": "the best pools the bee scored"},
-            {"command": "race", "description": "you vs the bee vs random, and the forward test"},
-            {"command": "me", "description": "your paper account"},
-            {"command": "alerts", "description": "on or off: a message for every PASS"},
-            {"command": "chain", "description": "switch chain"},
-            {"command": "help", "description": "what this is"}])
+        th = None
         try:
-            while True:
+            while not stop.is_set():
                 try:
-                    for upd in self.tg.updates(self.offset + 1 if self.offset else 0):
+                    me = self.tg.call("getMe")
+                    break
+                except (TelegramError, OSError) as e:
+                    if isinstance(e, TelegramError) and e.fatal:
+                        raise
+                    say("telegram startup: %s, retrying" % type(e).__name__)
+                    stop.wait(self.retry_delay(e))
+            if stop.is_set():
+                return
+            say("beebrain bot @%s on %s. ctrl-c to stop." % (me.get("username"), ", ".join(self.fields)))
+            self.setup_menu(say)
+            menu_due = time.monotonic() + MENU_RETRY_S
+            th = threading.Thread(target=fields, daemon=True)
+            th.start()
+            while not stop.is_set():
+                if not self.menu_ready and time.monotonic() >= menu_due:
+                    self.setup_menu(say)
+                    menu_due = time.monotonic() + MENU_RETRY_S
+                try:
+                    updates = self.tg.updates(self.offset + 1 if self.offset else 0)
+                    self.last_poll_at = time.time()
+                    for upd in updates:
                         self.offset = max(self.offset, upd["update_id"])
                         try:
                             self.handle(upd)
-                        except (TelegramError, OSError) as e:
-                            say("reply failed: %s" % e)
+                        except Exception as e:
+                            say("reply failed: %s" % type(e).__name__)
                 except (TelegramError, OSError) as e:
-                    say("telegram: %s, retrying" % e)
-                    time.sleep(3)
+                    if isinstance(e, TelegramError) and e.fatal:
+                        raise
+                    say("telegram polling: %s, retrying" % type(e).__name__)
+                    stop.wait(self.retry_delay(e))
         except KeyboardInterrupt:
             pass
         finally:
             stop.set()
-            self.save()
+            if th is not None:
+                th.join(timeout=45)
+            if th is None or not th.is_alive():
+                self.save()
+            else:
+                say("field worker still stopping; keeping the last saved state")
+
+
+def check_telegram(tg):
+    """read-only operator check; never consumes updates or changes telegram settings."""
+    me = tg.call("getMe")
+    commands = tg.call("getMyCommands") or []
+    menu = tg.call("getChatMenuButton") or {}
+    webhook = tg.call("getWebhookInfo") or {}
+    names = {c["command"] for c in commands}
+    missing = sorted({c["command"] for c in COMMANDS} - names)
+    result = {"username": me.get("username"), "missing_commands": missing,
+              "menu_type": menu.get("type"), "webhook_active": bool(webhook.get("url")),
+              "pending_updates": webhook.get("pending_update_count", 0),
+              "note": "api access only; does not prove the polling process is running"}
+    result["ok"] = not missing and menu.get("type") == "commands" and not result["webhook_active"]
+    return result
 
 
 def read_token(path=None):

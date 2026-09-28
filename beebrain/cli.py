@@ -90,16 +90,30 @@ def _scan(a):
 
 
 def _bot(a):
-    from .bot.app import BeeBot, read_token
-    from .bot.telegram import Telegram
+    from .bot.app import BeeBot, check_telegram, read_token
+    from .bot.telegram import Telegram, TelegramError
+    chains = [c.strip() for c in a.chains.split(",") if c.strip()]
+    if not chains or any(c not in ("solana", "base", "bsc", "robinhood") for c in chains):
+        sys.stderr.write("choose --chains from solana,base,bsc,robinhood\n")
+        return 2
     try:
         token = read_token(a.token_file)
     except OSError:
         sys.stderr.write("no bot token. put the one @BotFather gave you in ~/.beebrain/bot.token (chmod 600) "
                          "or in BEEBRAIN_BOT_TOKEN\n")
         return 2
-    chains = [c.strip() for c in a.chains.split(",") if c.strip()]
-    BeeBot(Telegram(token), chains, channel=a.channel or None).run()
+    try:
+        tg = Telegram(token)
+        if a.check:
+            result = check_telegram(tg)
+            print(json.dumps(result, indent=2))
+            return 0 if result["ok"] else 1
+        BeeBot(tg, chains, state_dir=a.state_dir, channel=a.channel or None).run()
+    except (TelegramError, OSError, ValueError) as e:
+        code = getattr(e, "code", None)
+        hint = "check credentials" if code in (401, 404) else "check for another poller or an active webhook" if code == 409 else "check logs and connectivity"
+        sys.stderr.write("bot stopped (%s%s): %s\n" % (type(e).__name__, " %s" % code if code else "", hint))
+        return 2
     return 0
 
 
@@ -189,9 +203,11 @@ def build_parser():
     sc.set_defaults(fn=_scan)
 
     bt = sub.add_parser("bot", help="run the telegram bot: live verdicts, alerts, paper accounts per user")
-    bt.add_argument("--chains", default="solana", help="comma list: solana,base,bsc,robinhood")
+    bt.add_argument("--chains", default="solana,robinhood", help="comma list: solana,base,bsc,robinhood")
     bt.add_argument("--token-file", default=None, help="default ~/.beebrain/bot.token, or set BEEBRAIN_BOT_TOKEN")
     bt.add_argument("--channel", default="", help="also post every PASS to this channel, e.g. @yourchannel")
+    bt.add_argument("--state-dir", default=None, help="state directory, default ~/.beebrain")
+    bt.add_argument("--check", action="store_true", help="read-only check of credentials, commands, menu and webhook; does not start polling")
     bt.set_defaults(fn=_bot)
 
     fo = sub.add_parser("forage", help="run the field headless for a while and save a report")

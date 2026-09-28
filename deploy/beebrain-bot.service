@@ -1,0 +1,24 @@
+[Unit]
+Description=BeeBrain Telegram bot
+After=network-online.target
+Wants=network-online.target
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
+[Service]
+Type=simple
+User=beebrain
+Group=beebrain
+WorkingDirectory=/opt/beebrain
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/opt/beebrain/.venv/bin/beebrain bot --chains solana,robinhood --token-file /etc/beebrain/bot.token --state-dir /var/lib/beebrain
+StateDirectory=beebrain
+UMask=0077
+Restart=on-failure
+RestartSec=10
+KillSignal=SIGINT
+TimeoutStopSec=100
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target

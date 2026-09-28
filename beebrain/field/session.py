@@ -31,6 +31,7 @@ RANDOM_MIN_RATE = 0.08
 GRADUATE_POOLS = 300            # forward tested pools before the gate can open
 GRADUATE_EDGE = 0.05            # PASS must beat the brain's own SKIPs by this much average net return
 FWD_CAP = 5.0                   # +500%. one dead pool that "revives" 1000x would own every average otherwise
+HISTORY_LIMIT = 1000
 SEED = 5
 
 
@@ -52,6 +53,7 @@ class FieldSession:
         self.fwd = {v: {"n": 0, "wins": 0, "net": 0.0} for v in ("PASS", "WATCH", "SKIP", "BRAIN_SKIP")}
         self.fwd_recent = deque(maxlen=200)
         self.fwd_dropped = 0
+        self.history = deque(maxlen=HISTORY_LIMIT)
         self.fwd_log = []                # every resolved forward test, for reports
         self.counts = {"PASS": 0, "WATCH": 0, "SKIP": 0}
         self.scored = 0
@@ -145,6 +147,10 @@ class FieldSession:
         self.shadows.append({"pair": s["pair"], "symbol": s["symbol"], "t0": now_ms, "p0": s["price"],
                              "due": now_ms + self.horizon_min * 60000, "verdict": v, "act": rec["act"], "took": took,
                              "comb": t["comb"], "obs": obs, "noise": noise, "reasons": reasons, "liq": s["liq"]})
+        self.history.append({"pair": s["pair"], "token": s.get("token", ""), "symbol": s["symbol"],
+                             "url": s.get("url", ""), "verdict": v, "t0": now_ms, "p0": s["price"],
+                             "due": now_ms + self.horizon_min * 60000, "status": "pending",
+                             "reasons": list(reasons), "score": t["comb"]})
         rec["took"] = took
         self.recent.append(rec)
         self.last = rec
@@ -168,16 +174,25 @@ class FieldSession:
             if now_ms < sh["due"]:
                 keep.append(sh)
             elif s and s["t_ms"] >= sh["due"] and s["price"] > 0 and sh["p0"] > 0:
-                self.resolve(sh, s["price"])
+                self.resolve(sh, s["price"], s["t_ms"])
             elif now_ms - sh["due"] > DROP_AFTER_MIN * 60000:
                 self.fwd_dropped += 1
+                self.update_history(sh, status="unavailable", checked_at=now_ms)
             else:
                 keep.append(sh)
         self.shadows = keep
 
-    def resolve(self, sh, price):
+    def update_history(self, sh, **values):
+        for row in reversed(self.history):
+            if row["pair"] == sh["pair"] and row["t0"] == sh["t0"]:
+                row.update(values)
+                break
+
+    def resolve(self, sh, price, observed_ms=None):
         ret = price / sh["p0"] - 1
         net = (1 + ret) * (1 - FWD_FEE) - 1
+        self.update_history(sh, status="resolved", p1=price, ret=ret, net=net, fee=FWD_FEE,
+                            observed_at=observed_ms, target_at=sh["due"])
         won = net > 0
         keys = [sh["verdict"]] + (["BRAIN_SKIP"] if sh["verdict"] == "SKIP" and not sh.get("reasons") else [])
         for key in keys:
@@ -252,7 +267,7 @@ class FieldSession:
             "brain": {"w": b.w, "eps": b.eps, "resolved": b.resolved, "sugar": b.sugar, "pain": b.pain,
                       "memory": [[sorted(a), w] for a, w in list(b.memory)[-300:]]},
             "accounts": {k: a.to_json() for k, a in self.accounts.items()},
-            "shadows": self.shadows, "fwd": self.fwd, "fwd_dropped": self.fwd_dropped,
+            "history": list(self.history), "shadows": self.shadows, "fwd": self.fwd, "fwd_dropped": self.fwd_dropped,
             "counts": self.counts, "scored": self.scored, "bee_takes": self.bee_takes, "reflexed": self.reflexed,
             "seen": list(self.seen)[-3000:],
         }
@@ -272,5 +287,6 @@ class FieldSession:
         s.shadows, s.fwd, s.fwd_dropped = d["shadows"], d["fwd"], d["fwd_dropped"]
         s.fwd.setdefault("BRAIN_SKIP", {"n": 0, "wins": 0, "net": 0.0})
         s.counts, s.scored, s.bee_takes, s.reflexed = d["counts"], d["scored"], d["bee_takes"], d["reflexed"]
+        s.history.extend(d.get("history", [])[-HISTORY_LIMIT:])
         s.seen = set(d["seen"])
         return s

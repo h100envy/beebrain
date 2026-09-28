@@ -34,7 +34,7 @@ read only, public, no keys.
 | geckoterminal `networks/{net}/new_pools` and `trending_pools?duration=5m`, in turn | the newest and the hottest pools | every 90 s, doubles on 429, up to 10 min |
 | dexscreener `latest/dex/pairs/{chain}` | prices for open positions and forward tests, 30 pairs a call | every 15 s |
 
-chains: solana, base, bsc, robinhood chain (dexscreener only). pools older than 30 days or above $200m fdv are left out,
+chains: solana, base, bsc and Robinhood Chain (Dexscreener only for Robinhood). pools older than 30 days or above $200m fdv are left out,
 they are not launches.
 
 ## senses

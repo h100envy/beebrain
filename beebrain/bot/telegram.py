@@ -11,7 +11,14 @@ API = "https://api.telegram.org/bot%s/%s"
 
 
 class TelegramError(Exception):
-    pass
+    def __init__(self, message, code=None, retry_after=None):
+        super().__init__(message)
+        self.code = code
+        self.retry_after = retry_after
+
+    @property
+    def fatal(self):
+        return self.code in (401, 404, 409)
 
 
 class Telegram:
@@ -31,9 +38,12 @@ class Telegram:
             try:
                 d = json.load(e)
             except ValueError:
-                raise TelegramError("%s: http %d" % (method, e.code))
+                raise TelegramError("%s: http %d" % (method, e.code), code=e.code) from None
+        except (OSError, ValueError) as e:
+            raise TelegramError("%s: %s" % (method, type(e).__name__)) from None
         if not d.get("ok"):
-            raise TelegramError("%s: %s" % (method, d.get("description", "failed")))
+            raise TelegramError("%s: %s" % (method, str(d.get("description", "failed")).replace(self.token, "[redacted]")),
+                                code=d.get("error_code"), retry_after=d.get("parameters", {}).get("retry_after"))
         return d.get("result")
 
     def call(self, method, **payload):
