@@ -1,7 +1,17 @@
 """a single verified-format address flows unchanged to every launch surface."""
+import importlib.util
+from pathlib import Path
+
 import pytest
 
-from brand.token_launch import overlay_text, token_html, token_markdown, validate
+# The launch helper is repository tooling, not part of the installed package.
+spec = importlib.util.spec_from_file_location("token_launch", Path(__file__).resolve().parents[1] / "brand/token_launch.py")
+launch = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(launch)
+overlay_text = launch.overlay_text
+token_html = launch.token_html
+token_markdown = launch.token_markdown
+validate = launch.validate
 
 
 def test_empty_address_is_explicit_and_cannot_be_copied():
