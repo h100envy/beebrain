@@ -24,6 +24,7 @@ WEB = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(WEB)
 sys.path.insert(0, ROOT)
 
+from brand.token_launch import load_config, token_html, token_markdown  # noqa: E402
 from beebrain.brain import waggle_vector  # noqa: E402
 from beebrain.engine import Engine, run  # noqa: E402
 
@@ -219,12 +220,15 @@ def article_html():
 def outputs():
     rows = seed_rows()
     vec = vector_json()
+    token = load_config()
     idx_path = os.path.join(WEB, "index.html")
     readme_path = os.path.join(ROOT, "README.md")
     idx = open(idx_path, encoding="utf-8").read()
+    idx = fill(idx, "token", token_html(token))
     idx = fill(idx, "seeds", seeds_html(rows))
     idx = fill(idx, "vector", "<pre><code>%s</code></pre>" % html.escape(vec))
     readme = open(readme_path, encoding="utf-8").read()
+    readme = fill(readme, "token", token_markdown(token))
     readme = fill(readme, "vector", "```json\n%s\n```" % vec)
     readme = fill(readme, "seeds", seeds_md(rows))
     return {os.path.join(WEB, "article", "index.html"): article_html(), idx_path: idx, readme_path: readme}

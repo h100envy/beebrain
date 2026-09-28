@@ -66,6 +66,15 @@
       </div>
     </div>
 
+    <!-- sim:token -->
+<div class="token-card" aria-label="token contract">
+  <div class="token-heading"><strong>$BEEBRAIN</strong><span>solana</span></div>
+  <div class="token-contract"><span>CA:</span><code id="token-address">FW1FhMWeGwyLQLt8HaZ7Zjkoecf7FZNSw8ZC3fMApump</code>
+    <button class="btn" id="copy-token-ca" type="button">copy CA</button></div>
+  <p class="token-feedback" id="token-feedback" role="status"></p>
+</div>
+<!-- /sim:token -->
+
     <div id="ticker" class="ticker" aria-live="polite">
       <div class="tick-head"><span class="live-dot" aria-hidden="true"></span><b>the bee right now</b><span class="tick-stat">waking up the bee</span></div>
       <ul class="tick-list"></ul>
@@ -294,6 +303,7 @@ beebrain scan --json       # one pass over the live field, for your own tools</c
 </footer>
 <script src="trade/bee.js"></script>
 <script src="assets/live.js"></script>
+<script src="assets/token.js"></script>
 <script>
   // reduced motion: keep the poster, never start the video
   (function () {

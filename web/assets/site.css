@@ -173,3 +173,16 @@ ul.plain li b { color: var(--bone); font-weight: 500; }
   .lede { font-size: 15px; }
   .tagline { letter-spacing: .2em; }
 }
+
+/* token identity: compact, readable at mobile widths, no shortened addresses */
+.token-card { margin-top: 28px; padding: 16px 20px; border: 1px solid #653048; border-radius: 12px; background: #090408; }
+.token-heading { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 8px; }
+.token-heading strong { color: var(--pink-soft); font-size: 21px; }
+.token-heading span { color: var(--dim); font-size: 12px; }
+.token-contract { display: flex; align-items: center; gap: 12px; }
+.token-contract > span { color: var(--pink-soft); }
+.token-contract code { flex: 1; min-width: 0; overflow-wrap: anywhere; user-select: all; }
+.token-contract button { flex-shrink: 0; font-family: inherit; cursor: pointer; padding: 7px 14px; }
+.token-contract button:disabled { opacity: .4; cursor: default; }
+.token-feedback { min-height: 1.5em; margin: 6px 0 0; font-size: 12px; color: var(--dim); }
+@media (max-width: 480px) { .token-card { padding: 14px; } .token-contract { flex-wrap: wrap; } .token-contract code { flex-basis: 80%; } }

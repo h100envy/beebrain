@@ -16,6 +16,7 @@
   <a href="https://beebrain.pro/trade/"><b>race the bee live</b></a> ·
   <a href="#how-it-works"><b>how it works</b></a> ·
   <a href="#results-so-far"><b>results</b></a> ·
+  <a href="#roadmap"><b>roadmap</b></a> ·
   <a href="docs/article.md"><b>the article</b></a> ·
   <a href="https://x.com/beebrainnerve"><b>x.com/beebrainnerve</b></a>
 </p>
@@ -23,6 +24,20 @@
 <p align="center">
   <img src="web/assets/brand/terminal.gif" width="100%" alt="the beebrain terminal running on synthetic pools: pools pass through five lobes, the waggle dance redraws, the paper account and hive log update">
 </p>
+
+<p align="center">
+  <img src="docs/media/token-avatar.png" width="220" alt="BeeBrain token mascot: a luminous pink bee on a black background">
+</p>
+
+<!-- sim:token -->
+## token
+
+**ticker:** `$BEEBRAIN`
+
+**network:** solana
+
+**CA:** `FW1FhMWeGwyLQLt8HaZ7Zjkoecf7FZNSw8ZC3fMApump`
+<!-- /sim:token -->
 
 ## what it is
 
@@ -187,17 +202,24 @@ more in [docs/limitations.md](docs/limitations.md).
 
 ## roadmap
 
-<p align="center">
-  <img src="docs/media/roadmap.svg" width="100%" alt="roadmap: the sim is done, the field is live now, signals are next, then the graduation gate, then opt in execution after the gate">
-</p>
+**we are here: launching $BEEBRAIN on Solana.** the brain, scanner and Telegram bot are already built. the official contract address is listed in the [token section](#token).
 
-- signals: pass alerts, a telegram bot and a json api, so you can act on the bee by hand.
-- read only wallet scoring: paste a public address, see how the bee would have scored every trade you made.
-- the hive: one bee per chain with a shared mushroom memory, and a bee that arrives trained instead of empty.
-- the gate: 300 forward tested pools, PASS beats the brain's own SKIP, the bee beats random.
-- execution after the gate: opt in, your own wallet signs, small size, hard limits. never custody.
+<a href="docs/roadmap.md"><img src="docs/media/roadmap.svg" width="100%" alt="BeeBrain roadmap with token launch on Solana highlighted as the current stage; foundation built, followed by bot reliability, evidence and API, Hive and gated execution"></a>
 
-the full plan: [docs/roadmap.md](docs/roadmap.md).
+| Phase | Status | What it delivers |
+| --- | --- | --- |
+| 01 · The foundation | Built | Five-lobe brain, 2,000 Kenyon cells, four-chain pool scoring, Telegram bot, paper accounts and forward tests |
+| 02 · Token launch | **Current** | **$BEEBRAIN on Solana**, launch visuals, official CA in README and on the site, community launch |
+| 03 · Team + reliability | Next | Fund development and hire senior engineers; ship bot recovery, signal history and diagnostics; build toward live trading |
+| 04 · Evidence + API | Next | Scheduled field reports, documented training seeds, JSON API and webhooks |
+| 05 · The Hive | Planned | Read-only wallet scoring, per-chain bees and shared-memory experiments |
+| 06 · Opt-in execution | After the gate | User-controlled signing, position limits and a kill switch, only after evaluation criteria are met |
+
+**Funding the build:** project proceeds will go toward development and hiring senior engineers to bring BeeBrain to live trading. Live execution will launch only after testing and the evaluation gate.
+
+The initial field reports have not passed the execution gate. Token launch and trading readiness are separate milestones. Future stages have no fixed dates.
+
+[Full roadmap and acceptance criteria](docs/roadmap.md) · [Download the roadmap image](docs/media/roadmap.png)
 
 ## the article and the site
 
